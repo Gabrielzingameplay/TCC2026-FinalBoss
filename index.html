@@ -1,0 +1,2548 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Focus Zone • Futuro sem distrações</title>
+
+<style>
+:root{
+  --bg:#070A12;
+  --bg2:#050812;
+  --panel: rgba(12, 16, 31, .72);
+  --panel2: rgba(10, 14, 28, .54);
+  --stroke: rgba(135, 160, 255, .16);
+  --text:#EAF2FF;
+  --muted:#A6B2CC;
+
+  --a1:#63FFF2;
+  --a2:#9D6BFF;
+  --a3: rgba(99,255,242,.12);
+  --a4: rgba(157,107,255,.12);
+
+  --danger:#FF4D6D;
+  --ok:#5CFF8A;
+
+  --shadow: 0 18px 70px rgba(0,0,0,.58);
+  --radius: 18px;
+  --radius2: 14px;
+
+  --focusRing: 0 0 0 3px rgba(99,255,242,.10);
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+  color: var(--text);
+  background:
+    radial-gradient(1200px 700px at 12% 18%, rgba(99,255,242,.12), transparent 60%),
+    radial-gradient(900px 650px at 88% 10%, rgba(157,107,255,.14), transparent 60%),
+    radial-gradient(900px 650px at 70% 92%, rgba(99,255,242,.10), transparent 60%),
+    linear-gradient(180deg, var(--bg), var(--bg2));
+  overflow-x:hidden;
+}
+
+.bg-grid{
+  position:fixed; inset:0;
+  background-image:
+    linear-gradient(to right, rgba(120,160,255,.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(120,160,255,.06) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(circle at 50% 18%, rgba(0,0,0,1), rgba(0,0,0,0) 72%);
+  pointer-events:none;
+  opacity:.9;
+}
+
+.blobs{
+  position:fixed; inset:0;
+  pointer-events:none;
+  opacity:.9;
+  filter: blur(30px);
+}
+.blob{
+  position:absolute;
+  width:380px; height:380px;
+  border-radius:999px;
+  background: radial-gradient(circle at 30% 30%, var(--a3), transparent 60%),
+              radial-gradient(circle at 70% 70%, var(--a4), transparent 60%);
+  animation: float 10s ease-in-out infinite;
+}
+.blob.b1{ left:-90px; top:90px; animation-duration: 12s;}
+.blob.b2{ right:-110px; top:30px; width:420px; height:420px; animation-duration: 14s;}
+.blob.b3{ left:35%; bottom:-160px; width:520px; height:520px; animation-duration: 16s;}
+@keyframes float{
+  0%,100%{ transform: translate(0,0) scale(1); }
+  50%{ transform: translate(18px,-22px) scale(1.04); }
+}
+
+.topbar{
+  position:sticky; top:0; z-index:10;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 16px;
+  backdrop-filter: blur(14px);
+  background: linear-gradient(to bottom, rgba(5,8,16,.92), rgba(5,8,16,.62));
+  border-bottom:1px solid var(--stroke);
+}
+
+.brand{display:flex; gap:12px; align-items:center}
+.logo{
+  width:44px; height:44px; border-radius:14px;
+  display:grid; place-items:center;
+  background: linear-gradient(135deg, rgba(99,255,242,.18), rgba(157,107,255,.18));
+  border:1px solid rgba(99,255,242,.26);
+  box-shadow: 0 0 0 2px rgba(157,107,255,.06), 0 0 40px rgba(99,255,242,.14);
+  font-weight:950;
+  letter-spacing:.5px;
+}
+.title{font-weight:950; font-size:16px}
+.subtitle{font-size:12px; color:var(--muted)}
+
+.top-actions{display:flex; align-items:center; gap:10px}
+
+.shell{
+  display:grid;
+  grid-template-columns: 280px 1fr;
+  gap:16px;
+  padding:16px;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.sidebar{
+  position:sticky;
+  top:86px;
+  height: calc(100vh - 100px);
+  border:1px solid var(--stroke);
+  border-radius: var(--radius);
+  background: linear-gradient(180deg, rgba(12,16,31,.72), rgba(10,14,26,.52));
+  box-shadow: var(--shadow);
+  padding:10px;
+  overflow:auto;
+}
+
+.nav{
+  width:100%;
+  border:1px solid rgba(120,160,255,.14);
+  background: linear-gradient(180deg, rgba(0,0,0,.14), rgba(0,0,0,.08));
+  color:var(--text);
+  padding:11px 12px;
+  border-radius:14px;
+  text-align:left;
+  cursor:pointer;
+  margin-bottom:9px;
+  transition:.18s transform, .18s background, .18s border, .18s filter;
+  font-weight:900;
+}
+.nav:hover{transform: translateY(-1px); filter:brightness(1.06); border-color:rgba(99,255,242,.26)}
+.nav.active{
+  background: linear-gradient(135deg, rgba(99,255,242,.12), rgba(157,107,255,.12));
+  border-color: rgba(157,107,255,.28);
+}
+
+.hint{
+  margin-top:12px;
+  padding:12px;
+  border-radius:14px;
+  border:1px dashed rgba(99,255,242,.22);
+  background: rgba(99,255,242,.05);
+}
+.hintTitle{font-weight:950; margin-bottom:6px}
+.hintText{font-size:12px; color:var(--muted); line-height:1.35}
+
+.content{min-height: calc(100vh - 140px)}
+.panel{display:none; animation: fade .18s ease}
+.panel.active{display:block}
+@keyframes fade{from{opacity:.35; transform:translateY(4px)} to{opacity:1; transform:none}}
+
+.card{
+  border:1px solid var(--stroke);
+  border-radius: var(--radius);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.03), transparent 22%),
+    linear-gradient(180deg, var(--panel), var(--panel2));
+  box-shadow: var(--shadow);
+  padding:16px;
+  margin-bottom:16px;
+  position:relative;
+  overflow:hidden;
+}
+.card::after{
+  content:"";
+  position:absolute;
+  inset:-2px;
+  background: radial-gradient(520px 220px at 20% 0%, rgba(99,255,242,.09), transparent 60%),
+              radial-gradient(520px 220px at 80% 0%, rgba(157,107,255,.10), transparent 60%);
+  opacity:.55;
+  pointer-events:none;
+}
+.card > *{ position:relative; z-index:1; }
+
+h2,h3{margin:0 0 8px 0}
+p{margin:0 0 10px 0}
+.muted{color:var(--muted)}
+.tiny{font-size:12px}
+.neon{color:var(--a1); text-shadow: 0 0 18px rgba(99,255,242,.18)}
+
+.grid2{display:grid; grid-template-columns:1fr 1fr; gap:14px}
+.grid3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px}
+
+.box{
+  border:1px solid rgba(120,160,255,.14);
+  border-radius:14px;
+  background: linear-gradient(180deg, rgba(0,0,0,.16), rgba(0,0,0,.10));
+  padding:12px;
+}
+
+label{display:block; font-size:12px; color:var(--muted); margin-top:10px; margin-bottom:6px}
+input, textarea, select{
+  width:100%;
+  border-radius:12px;
+  border:1px solid rgba(120,160,255,.16);
+  background: rgba(6,10,20,.58);
+  color: var(--text);
+  padding:10px 10px;
+  outline:none;
+}
+textarea{resize:vertical}
+input:focus, textarea:focus, select:focus{
+  border-color: rgba(99,255,242,.34);
+  box-shadow: var(--focusRing);
+}
+
+.row{display:flex; gap:10px; align-items:center; margin-top:12px; flex-wrap:wrap}
+.between{justify-content:space-between}
+
+.btn{
+  border:1px solid rgba(99,255,242,.28);
+  background: linear-gradient(135deg, rgba(99,255,242,.14), rgba(157,107,255,.14));
+  color: var(--text);
+  padding:10px 12px;
+  border-radius: var(--radius2);
+  cursor:pointer;
+  font-weight:950;
+  transition:.18s transform, .18s filter, .18s border;
+}
+.btn:hover{transform: translateY(-1px); filter:brightness(1.1); border-color: rgba(99,255,242,.38)}
+.btn:disabled{opacity:.45; cursor:not-allowed; transform:none}
+.btn.ghost{ background: rgba(0,0,0,.10); border-color: rgba(120,160,255,.18); }
+
+.pill{
+  display:flex; gap:10px; align-items:center;
+  padding:8px 10px;
+  border-radius:999px;
+  border:1px solid rgba(120,160,255,.18);
+  background: rgba(0,0,0,.18);
+}
+.pill.small{padding:6px 10px; font-size:13px}
+
+.avatar{
+  width:32px; height:32px;
+  border-radius:12px;
+  border:1px solid rgba(99,255,242,.22);
+  object-fit:cover;
+  background: rgba(99,255,242,.10);
+}
+.avatar.xl{width:88px; height:88px; border-radius:22px}
+
+.chips{display:flex; gap:8px; flex-wrap:wrap; margin-top:10px}
+.chip{
+  font-size:12px;
+  padding:6px 10px;
+  border-radius:999px;
+  border:1px solid rgba(157,107,255,.22);
+  background: rgba(157,107,255,.10);
+}
+
+.sep{border:none; border-top:1px solid rgba(120,160,255,.14); margin:14px 0}
+
+.listCards{display:flex; flex-direction:column; gap:10px; margin-top:10px}
+.cardItem{
+  border:1px solid rgba(120,160,255,.16);
+  background: rgba(0,0,0,.15);
+  border-radius:14px;
+  padding:12px;
+}
+.cardItem .meta{font-size:12px; color:var(--muted)}
+.cardItem .title{font-weight:950; margin:6px 0}
+.cardItem .actions{display:flex; gap:8px; margin-top:10px; flex-wrap:wrap}
+
+.bigStat{font-size:36px; font-weight:1000; letter-spacing:.5px; margin:6px 0 10px; text-shadow:0 0 22px rgba(99,255,242,.10)}
+.note{
+  padding:10px 12px;
+  border-radius:14px;
+  border:1px dashed rgba(157,107,255,.28);
+  background: rgba(157,107,255,.08);
+  color: rgba(234,242,255,.92);
+}
+.toast{
+  margin-top:12px;
+  padding:10px 12px;
+  border-radius:14px;
+  border:1px solid rgba(99,255,242,.24);
+  background: rgba(99,255,242,.06);
+}
+.toast.err{border-color: rgba(255,77,109,.34); background: rgba(255,77,109,.10)}
+
+.videoGrid{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:14px;
+}
+.videoCard iframe{
+  width:100%;
+  aspect-ratio: 16/9;
+  border:1px solid rgba(120,160,255,.18);
+  border-radius:14px;
+  background: rgba(0,0,0,.25);
+}
+
+.timerText{font-size:54px; font-weight:1000; text-align:center; padding:10px 0; text-shadow:0 0 34px rgba(157,107,255,.12)}
+
+.arena{
+  position:relative;
+  height:260px;
+  border-radius:18px;
+  border:1px solid rgba(120,160,255,.16);
+  background: radial-gradient(500px 260px at 50% 40%, rgba(99,255,242,.08), rgba(0,0,0,.22));
+  overflow:hidden;
+}
+.core{
+  position:absolute;
+  width:56px; height:56px;
+  border-radius:999px;
+  border:1px solid rgba(99,255,242,.35);
+  background: rgba(99,255,242,.12);
+  color: var(--a1);
+  font-size:30px;
+  cursor:pointer;
+  box-shadow: 0 0 44px rgba(99,255,242,.18);
+}
+.arenaHud{
+  position:absolute; left:10px; top:10px;
+  display:flex; gap:12px;
+  padding:8px 10px;
+  border-radius:14px;
+  border:1px solid rgba(120,160,255,.16);
+  background: rgba(0,0,0,.18);
+  font-size:13px;
+  color:var(--muted);
+}
+
+.memGrid{
+  display:grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap:10px;
+  margin-top:12px;
+}
+.memCard{
+  height:64px;
+  border-radius:14px;
+  border:1px solid rgba(120,160,255,.16);
+  background: rgba(0,0,0,.15);
+  display:grid;
+  place-items:center;
+  cursor:pointer;
+  font-size:22px;
+  font-weight:950;
+  user-select:none;
+  transition: .12s transform, .12s filter, .12s border;
+}
+.memCard:hover{ transform: translateY(-1px); filter:brightness(1.06); }
+.memCard.revealed{ border-color: rgba(99,255,242,.32); background: rgba(99,255,242,.08); }
+.memCard.matched{ border-color: rgba(92,255,138,.32); background: rgba(92,255,138,.08); cursor:default; }
+
+.rankRow{
+  display:flex; align-items:center; gap:10px;
+  padding:10px 12px;
+  border:1px solid rgba(120,160,255,.14);
+  background: rgba(0,0,0,.14);
+  border-radius:14px;
+  margin-top:10px;
+}
+.rankRow .pos{width:34px; text-align:center; font-weight:1000; color:rgba(99,255,242,.95)}
+.rankRow .name{font-weight:950}
+.rankRow .pts{margin-left:auto; font-weight:1000}
+
+.progressBar{
+  height:10px;
+  border-radius:999px;
+  border:1px solid rgba(120,160,255,.16);
+  background: rgba(0,0,0,.18);
+  overflow:hidden;
+}
+.progressBar > div{
+  height:100%;
+  background: linear-gradient(90deg, rgba(99,255,242,.38), rgba(157,107,255,.38));
+  width:0%;
+}
+
+.badgeGrid{
+  display:grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap:10px;
+  margin-top:12px;
+}
+.badge{
+  border:1px solid rgba(120,160,255,.16);
+  background: rgba(0,0,0,.15);
+  border-radius:14px;
+  padding:12px;
+}
+.badge .bTop{display:flex; align-items:center; justify-content:space-between; gap:10px}
+.badge .bIcon{font-size:22px}
+.badge.locked{opacity:.55}
+.badge .bName{font-weight:950}
+.badge .bDesc{color:var(--muted); font-size:12px; margin-top:6px}
+
+@media (max-width: 980px){
+  .shell{grid-template-columns:1fr}
+  .sidebar{position:relative; top:auto; height:auto}
+  .grid2,.grid3,.videoGrid{grid-template-columns:1fr}
+  .memGrid{grid-template-columns: repeat(3, 1fr)}
+  .badgeGrid{grid-template-columns:1fr}
+}
+</style>
+</head>
+
+<body>
+<div class="bg-grid"></div>
+<div class="blobs">
+  <div class="blob b1"></div>
+  <div class="blob b2"></div>
+  <div class="blob b3"></div>
+</div>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="logo">FZ</div>
+    <div>
+      <div class="title">Focus Zone</div>
+      <div class="subtitle">Foco consciente • Internet com propósito • Aprendizado sem distrações</div>
+    </div>
+  </div>
+
+  <div class="top-actions">
+    <div class="pill" id="mePill" hidden>
+      <img id="meAvatar" class="avatar" alt="avatar" />
+      <div>
+        <div id="meName" style="font-weight:950; line-height:1.1"></div>
+        <div class="muted tiny">
+          <span id="mePoints">0</span> pts • nível <b id="meLevel">1</b> • meta diária: <span id="meGoal">30</span>
+        </div>
+      </div>
+    </div>
+    <button class="btn ghost" id="btnLogout" hidden>Sair</button>
+  </div>
+</header>
+
+<main class="shell">
+  <aside class="sidebar">
+    <button class="nav active" data-view="home">Painel</button>
+    <button class="nav" data-view="content">Conteúdo</button>
+    <button class="nav" data-view="videos">Vídeos (YouTube)</button>
+    <button class="nav" data-view="tracks">Trilhas</button>
+    <button class="nav" data-view="quiz">Quiz</button>
+    <button class="nav" data-view="games">Jogos</button>
+    <button class="nav" data-view="forum">Fóruns</button>
+    <button class="nav" data-view="groups">Grupos</button>
+    <button class="nav" data-view="profile">Perfil & Config</button>
+    <button class="nav" data-view="badges">Emblemas & Níveis</button>
+    <button class="nav" data-view="report">Relatório</button>
+    <button class="nav" data-view="rank">Rank</button>
+    <button class="nav" data-view="about">Por que é importante</button>
+
+    <div class="hint">
+      <div class="hintTitle">Modo Foco</div>
+      <div class="hintText">Pomodoro + metas pequenas. Ganhe pontos por disciplina e colaboração.</div>
+    </div>
+  </aside>
+
+  <section class="content">
+
+    <!-- AUTH -->
+    <section class="panel active" id="view-auth">
+      <div class="card">
+        <h2>Entrar no <span class="neon">Focus Zone</span></h2>
+        <p class="muted">Conta local. Tudo fica salvo no seu navegador.</p>
+
+        <div class="grid2">
+          <div class="box">
+            <h3>Login</h3>
+            <label>Usuário</label>
+            <input id="loginUser" autocomplete="username" placeholder="ex.: gabriel" />
+            <label>Senha</label>
+            <input id="loginPass" type="password" autocomplete="current-password" placeholder="••••••" />
+            <button class="btn" id="btnLogin">Entrar</button>
+          </div>
+
+          <div class="box">
+            <h3>Cadastro</h3>
+            <label>Usuário</label>
+            <input id="regUser" autocomplete="username" placeholder="mín. 3 letras" />
+            <label>Senha</label>
+            <input id="regPass" type="password" autocomplete="new-password" placeholder="mín. 6 chars" />
+            <button class="btn ghost" id="btnRegister">Criar conta</button>
+          </div>
+        </div>
+
+        <div class="toast" id="authToast" hidden></div>
+      </div>
+    </section>
+
+    <!-- HOME -->
+    <section class="panel" id="view-home">
+      <div class="grid3">
+        <div class="card">
+          <h2>Painel Futurístico</h2>
+          <p class="muted">Missão do dia: <b>internet com propósito</b>. Menos rolagem, mais criação.</p>
+          <div class="note"><b>Ganhe pontos:</b> quizzes, jogos, trilhas, fórum e grupos.</div>
+        </div>
+
+        <div class="card">
+          <h3>Seu progresso</h3>
+          <div class="muted tiny">Pontos totais</div>
+          <div class="bigStat"><span id="homePoints">0</span> pts</div>
+
+          <div class="row">
+            <div class="pill small">Nível: <b id="homeLevel">1</b></div>
+            <div class="pill small">Meta diária: <b id="homeGoal">30</b></div>
+            <div class="pill small">Hoje: <b id="homeDayPts">0</b></div>
+          </div>
+
+          <div class="progressBar" style="margin-top:12px"><div id="homeGoalBar"></div></div>
+
+          <div class="row">
+            <button class="btn ghost" id="btnQuickReward">Concluí 1 ciclo de foco (+5)</button>
+            <button class="btn ghost" id="btnResetDay">Reiniciar meta do dia</button>
+          </div>
+          <div class="toast" id="homeToast" hidden></div>
+        </div>
+
+        <div class="card">
+          <h3>Checklist Anti-Distração</h3>
+          <div class="box">
+            <label><input type="checkbox" class="ck" data-ck="notifs"> Notificações desligadas</label>
+            <label><input type="checkbox" class="ck" data-ck="desk"> Ambiente preparado</label>
+            <label><input type="checkbox" class="ck" data-ck="goal"> Meta definida</label>
+            <label><input type="checkbox" class="ck" data-ck="tabs"> Abas reduzidas (≤3)</label>
+            <label><input type="checkbox" class="ck" data-ck="phone"> Celular longe</label>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTENT -->
+    <section class="panel" id="view-content">
+      <div class="card">
+        <h2>Conteúdo: foco na internet</h2>
+        <p class="muted">Princípios práticos para aprender sem distrações.</p>
+
+        <div class="grid2">
+          <div class="box">
+            <h3>Por que distrações acontecem?</h3>
+            <p class="muted">A internet é projetada para capturar atenção: notificações, autoplay e rolagem infinita.</p>
+            <ul class="muted tiny" style="line-height:1.5">
+              <li>Troca de contexto consome energia mental.</li>
+              <li>Consumo passivo dá sensação de progresso.</li>
+              <li>Interrupções prejudicam memória e raciocínio.</li>
+            </ul>
+          </div>
+
+          <div class="box">
+            <h3>Como vencer isso</h3>
+            <ul class="muted tiny" style="line-height:1.5">
+              <li>Pomodoro + pausas reais.</li>
+              <li>Active Recall (se testar é melhor que reler).</li>
+              <li>Revisão espaçada.</li>
+              <li>Reduzir estímulos (menos abas, menos notificações).</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="note" style="margin-top:14px">
+          <b>Frase-chave:</b> “Internet com propósito: abrir, fazer, fechar.”
+        </div>
+      </div>
+    </section>
+
+    <!-- VIDEOS -->
+    <section class="panel" id="view-videos">
+      <div class="card">
+        <div class="row between">
+          <div>
+            <h2>Vídeos em português (YouTube)</h2>
+            <p class="muted">Cole um link do YouTube ou só o ID. O site extrai automaticamente.</p>
+          </div>
+          <div class="row">
+            <button class="btn ghost" id="btnResetVideos">Restaurar lista padrão</button>
+          </div>
+        </div>
+
+        <div class="box">
+          <label>Adicionar vídeo (ID ou link completo)</label>
+          <div class="row">
+            <input id="videoInput" placeholder="Ex.: https://www.youtube.com/watch?v=GMt7fxRDWB0 ou GMt7fxRDWB0" />
+            <button class="btn" id="btnSaveVideo">Adicionar</button>
+          </div>
+          <div class="muted tiny">Aceita watch?v=, youtu.be/, shorts/ e embed/.</div>
+        </div>
+
+        <div id="videoGrid" class="videoGrid" style="margin-top:14px"></div>
+        <div class="toast" id="videoToast" hidden></div>
+      </div>
+    </section>
+
+    <!-- TRACKS -->
+    <section class="panel" id="view-tracks">
+      <div class="card">
+        <div class="row between">
+          <div>
+            <h2>Trilhas (ENEM & Programação)</h2>
+            <p class="muted">Conclua etapas para ganhar pontos e desbloquear badges.</p>
+          </div>
+          <div class="row">
+            <select id="trackSelect"></select>
+            <button class="btn ghost" id="btnTrackReset">Reiniciar trilha</button>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="pill small">Progresso: <b id="trackProgressTxt">0%</b></div>
+          <div class="pill small">Etapas: <b id="trackStepsTxt">0/0</b></div>
+          <div class="pill small">Recompensa por etapa: <b>+6</b> pts</div>
+        </div>
+
+        <div class="progressBar" style="margin-top:12px"><div id="trackBar"></div></div>
+
+        <div class="box" style="margin-top:14px">
+          <h3 id="trackTitle">Trilha</h3>
+          <div class="muted tiny" id="trackDesc"></div>
+          <div id="trackSteps" class="listCards" style="margin-top:12px"></div>
+        </div>
+
+        <div class="box" style="margin-top:14px">
+          <h3>Notas da trilha</h3>
+          <textarea id="trackNotes" rows="4" placeholder="O que você aprendeu hoje?"></textarea>
+          <div class="row">
+            <button class="btn" id="btnSaveTrackNotes">Salvar notas</button>
+          </div>
+          <div class="toast" id="trackToast" hidden></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- QUIZ -->
+    <section class="panel" id="view-quiz">
+      <div class="card">
+        <div class="row between">
+          <div>
+            <h2>Quizzes</h2>
+            <p class="muted">Cada acerto vale +10 pts.</p>
+          </div>
+          <div class="row">
+            <select id="quizSelect"></select>
+            <button class="btn" id="btnQuizStart">Começar</button>
+            <button class="btn ghost" id="btnQuizReset" disabled>Reiniciar</button>
+          </div>
+        </div>
+
+        <div id="quizBox" class="box"></div>
+
+        <div class="row">
+          <div class="pill small" id="quizScorePill" hidden>Score: <b id="quizScore">0</b></div>
+          <div class="pill small" id="quizProgressPill" hidden>Progresso: <b id="quizProgress">0/0</b></div>
+        </div>
+
+        <div class="toast" id="quizToast" hidden></div>
+      </div>
+    </section>
+
+    <!-- GAMES -->
+    <section class="panel" id="view-games">
+      <div class="grid2">
+        <div class="card">
+          <h2>Jogo 1: Pomodoro</h2>
+          <p class="muted">Conclua ciclos e ganhe pontos.</p>
+
+          <div class="timerText" id="pomText">25:00</div>
+
+          <div class="row">
+            <select id="pomPreset">
+              <option value="25">25 min (clássico)</option>
+              <option value="15">15 min (rápido)</option>
+              <option value="5">5 min (aquecimento)</option>
+            </select>
+            <button class="btn" id="pomStart">Iniciar</button>
+            <button class="btn ghost" id="pomPause" disabled>Pausar</button>
+            <button class="btn ghost" id="pomReset" disabled>Reset</button>
+          </div>
+
+          <div class="toast" id="pomToast" hidden></div>
+        </div>
+
+        <div class="card">
+          <h2>Jogo 2: Reflexo Anti-Scroll</h2>
+          <p class="muted">Clique no núcleo quando aparecer (30s).</p>
+
+          <div class="arena" id="arena">
+            <button class="core" id="core" hidden>●</button>
+            <div class="arenaHud">
+              <div>Acertos: <b id="hit">0</b></div>
+              <div>Erros: <b id="miss">0</b></div>
+              <div>Combo: <b id="combo">0</b></div>
+            </div>
+          </div>
+
+          <div class="row">
+            <button class="btn" id="refStart">Iniciar (30s)</button>
+            <button class="btn ghost" id="refStop" disabled>Parar</button>
+          </div>
+
+          <div class="toast" id="refToast" hidden></div>
+        </div>
+
+        <div class="card" style="grid-column: 1 / -1;">
+          <div class="row between">
+            <div>
+              <h2>Jogo 3: Memória (Match)</h2>
+              <p class="muted">Encontre pares. Par = +2 pts, bônus ao concluir.</p>
+            </div>
+            <div class="row">
+              <select id="memLevel">
+                <option value="easy">Fácil (6 pares)</option>
+                <option value="med">Médio (8 pares)</option>
+                <option value="hard">Difícil (10 pares)</option>
+              </select>
+              <button class="btn" id="memNew">Novo jogo</button>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="pill small">Pares: <b id="memPairs">0</b></div>
+            <div class="pill small">Tentativas: <b id="memTries">0</b></div>
+            <div class="pill small">Acertos: <b id="memFound">0</b></div>
+          </div>
+
+          <div id="memGrid" class="memGrid"></div>
+          <div class="toast" id="memToast" hidden></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FORUM -->
+    <section class="panel" id="view-forum">
+      <div class="card">
+        <div class="row between">
+          <div>
+            <h2>Fóruns por categoria</h2>
+            <p class="muted">Crie, pesquise, edite e comente.</p>
+          </div>
+          <div class="row">
+            <select id="forumCategory"></select>
+            <input id="forumSearch" placeholder="buscar..." />
+            <button class="btn ghost" id="btnForumSearch">Buscar</button>
+          </div>
+        </div>
+
+        <div class="grid2" style="margin-top:12px">
+          <div class="box">
+            <h3>Novo post</h3>
+            <label>Título</label>
+            <input id="postTitle" />
+            <label>Tags (vírgula)</label>
+            <input id="postTags" />
+            <label>Conteúdo</label>
+            <textarea id="postContent" rows="6"></textarea>
+            <button class="btn" id="btnPostCreate">Publicar (+3 pts)</button>
+            <div class="toast" id="forumToast" hidden></div>
+          </div>
+
+          <div class="box">
+            <h3>Posts</h3>
+            <div id="postsList" class="listCards"></div>
+          </div>
+        </div>
+
+        <div class="card" id="postDetailCard" style="margin-top:14px" hidden>
+          <div class="row between">
+            <div>
+              <h2 id="detailTitle">Post</h2>
+              <div class="muted" id="detailMeta"></div>
+              <div class="chips" id="detailTags"></div>
+            </div>
+            <div class="row">
+              <button class="btn ghost" id="btnPostEdit" hidden>Editar</button>
+              <button class="btn ghost" id="btnPostDelete" hidden>Excluir</button>
+              <button class="btn" id="btnPostClose">Fechar</button>
+            </div>
+          </div>
+
+          <div class="box" id="detailContent" style="white-space:pre-wrap; line-height:1.45"></div>
+
+          <hr class="sep" />
+
+          <h3>Comentários</h3>
+          <div id="commentsList" class="listCards"></div>
+
+          <div class="box">
+            <label>Novo comentário</label>
+            <textarea id="commentText" rows="3"></textarea>
+            <button class="btn" id="btnCommentCreate">Comentar (+1 pt)</button>
+            <div class="toast" id="commentToast" hidden></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- GROUPS -->
+    <section class="panel" id="view-groups">
+      <div class="card">
+        <div class="row between">
+          <div>
+            <h2>Grupos de estudo</h2>
+            <p class="muted">Crie grupos, adicione membros e use o chat.</p>
+          </div>
+          <div class="row">
+            <input id="groupSearch" placeholder="buscar grupos..." />
+            <button class="btn ghost" id="btnGroupSearch">Buscar</button>
+          </div>
+        </div>
+
+        <div class="grid2" style="margin-top:12px">
+          <div class="box">
+            <h3>Novo grupo</h3>
+            <label>Nome</label>
+            <input id="groupName" />
+            <label>Tópico</label>
+            <input id="groupTopic" />
+            <label>Regras</label>
+            <textarea id="groupRules" rows="4"></textarea>
+            <button class="btn" id="btnGroupCreate">Criar grupo (+4 pts)</button>
+            <div class="toast" id="groupToast" hidden></div>
+          </div>
+
+          <div class="box">
+            <h3>Lista</h3>
+            <div id="groupsList" class="listCards"></div>
+          </div>
+        </div>
+
+        <div class="card" id="groupDetailCard" style="margin-top:14px" hidden>
+          <div class="row between">
+            <div>
+              <h2 id="gDetailName">Grupo</h2>
+              <div class="muted" id="gDetailMeta"></div>
+              <div class="chips" id="gDetailChips"></div>
+            </div>
+            <div class="row">
+              <button class="btn ghost" id="btnGroupJoin">Entrar (+2 pts)</button>
+              <button class="btn ghost" id="btnGroupLeave" hidden>Sair</button>
+              <button class="btn ghost" id="btnGroupEdit" hidden>Editar</button>
+              <button class="btn ghost" id="btnGroupDelete" hidden>Excluir</button>
+              <button class="btn" id="btnGroupClose">Fechar</button>
+            </div>
+          </div>
+
+          <div class="box">
+            <b>Regras:</b>
+            <div id="gDetailRules" class="muted" style="white-space:pre-wrap; margin-top:6px"></div>
+          </div>
+
+          <hr class="sep"/>
+
+          <div class="grid2">
+            <div class="box">
+              <h3>Membros</h3>
+              <div class="row">
+                <input id="memberUser" placeholder="username para adicionar" />
+                <button class="btn" id="btnAddMember">Adicionar</button>
+              </div>
+              <div id="memberList" class="listCards"></div>
+              <div class="toast" id="memberToast" hidden></div>
+            </div>
+
+            <div class="box">
+              <h3>Chat</h3>
+              <div id="groupMessages" class="listCards" style="max-height:260px; overflow:auto"></div>
+              <label>Mensagem</label>
+              <textarea id="groupMsgText" rows="3"></textarea>
+              <button class="btn" id="btnGroupMsgSend">Enviar (+1 pt)</button>
+              <div class="toast" id="gMsgToast" hidden></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROFILE -->
+    <section class="panel" id="view-profile">
+      <div class="card">
+        <h2>Perfil & Configurações</h2>
+        <p class="muted">Avatar, tema e meta diária.</p>
+
+        <div class="grid2">
+          <div class="box">
+            <h3>Dados</h3>
+            <label>Nome exibido</label>
+            <input id="pName" />
+            <label>Bio</label>
+            <textarea id="pBio" rows="4"></textarea>
+            <label>Meta diária</label>
+            <input id="pGoal" type="number" min="0" max="999" />
+            <label>Privacidade</label>
+            <select id="pPrivacy">
+              <option value="public">Público (aparece no ranking)</option>
+              <option value="private">Privado</option>
+            </select>
+            <button class="btn" id="btnProfileSave">Salvar</button>
+            <div class="toast" id="profileToast" hidden></div>
+          </div>
+
+          <div class="box">
+            <h3>Avatar & Tema</h3>
+            <div class="row">
+              <img id="pAvatar" class="avatar xl" alt="avatar" />
+              <div class="muted tiny">PNG/JPEG/WEBP</div>
+            </div>
+            <input id="pAvatarFile" type="file" accept="image/png,image/jpeg,image/webp" />
+            <div class="row">
+              <button class="btn ghost" id="btnAvatarUpload">Enviar foto</button>
+              <button class="btn ghost" id="btnAvatarReset">Remover</button>
+            </div>
+
+            <hr class="sep"/>
+
+            <label>Tema</label>
+            <div class="row">
+              <select id="pTheme">
+                <option value="aqua">Aqua Neon</option>
+                <option value="violet">Violet Neon</option>
+                <option value="matrix">Matrix Green</option>
+                <option value="sunset">Sunset Cyber</option>
+                <option value="ice">Ice Blue</option>
+              </select>
+              <button class="btn" id="btnThemeApply">Aplicar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- BADGES -->
+    <section class="panel" id="view-badges">
+      <div class="card">
+        <div class="row between">
+          <div>
+            <h2>Emblemas & Níveis</h2>
+            <p class="muted">Badges desbloqueiam por hábitos e ações.</p>
+          </div>
+          <div class="pill small">Seu nível: <b id="lvlNow">1</b></div>
+        </div>
+
+        <div class="box">
+          <div class="row"><div class="pill small">Pontos: <b id="lvlPoints">0</b></div><div class="pill small">Próximo nível em: <b id="lvlNext">0</b> pts</div></div>
+          <div class="progressBar" style="margin-top:12px"><div id="lvlBar"></div></div>
+          <div class="muted tiny" style="margin-top:8px" id="lvlTitle"></div>
+        </div>
+
+        <div class="box" style="margin-top:14px">
+          <h3>Seus badges</h3>
+          <div class="badgeGrid" id="badgeGrid"></div>
+          <div class="toast" id="badgeToast" hidden></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- REPORT -->
+    <section class="panel" id="view-report">
+      <div class="card">
+        <div class="row between">
+          <div>
+            <h2>Relatório</h2>
+            <p class="muted">Acompanhe métricas e exporte JSON.</p>
+          </div>
+          <div class="row">
+            <button class="btn ghost" id="btnExportJSON">Exportar JSON</button>
+          </div>
+        </div>
+        <div id="reportBox" class="box"></div>
+        <div class="toast" id="reportToast" hidden></div>
+      </div>
+    </section>
+
+    <!-- RANK -->
+    <section class="panel" id="view-rank">
+      <div class="card">
+        <div class="row between">
+          <div>
+            <h2>Rank • Top 50</h2>
+            <p class="muted">Apenas perfis públicos.</p>
+          </div>
+          <button class="btn ghost" id="btnRankRefresh">Atualizar</button>
+        </div>
+        <div id="rankList"></div>
+      </div>
+    </section>
+
+    <!-- ABOUT -->
+    <section class="panel" id="view-about">
+      <div class="card">
+        <h2>Por que este site é importante?</h2>
+        <p class="muted">Ele treina foco, disciplina e aprendizado consciente com internet como ferramenta.</p>
+        <div class="grid2">
+          <div class="box">
+            <h3>Ele incentiva</h3>
+            <ul class="muted tiny" style="line-height:1.5">
+              <li>Aprendizagem ativa: quizzes, jogos e trilhas.</li>
+              <li>Aprendizagem social: grupos e fóruns.</li>
+              <li>Autogestão: metas e relatório.</li>
+            </ul>
+          </div>
+          <div class="box">
+            <h3>Impacto</h3>
+            <ul class="muted tiny" style="line-height:1.5">
+              <li>Mais tempo real de estudo.</li>
+              <li>Mais consistência e retenção.</li>
+              <li>Menos uso impulsivo de redes sociais.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </section>
+</main>
+
+<script>
+/* =========================
+   FIX DO LOGIN/CADASTRO (100%)
+   - O problema mais comum é: DATA não salvar / session não persistir.
+   - Aqui garante: loadData robusto, seed, save, session, hash e eventos.
+========================= */
+const $ = (s)=>document.querySelector(s);
+const $$ = (s)=>Array.from(document.querySelectorAll(s));
+const nowISO = () => new Date().toISOString().slice(0,19).replace("T"," ");
+const uid = () => Math.random().toString(36).slice(2,10) + "-" + Date.now().toString(36);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (m)=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m]));
+
+function toast(el, msg, err=false){
+  el.textContent = msg;
+  el.classList.toggle("err", !!err);
+  el.hidden = false;
+  clearTimeout(el._t);
+  el._t = setTimeout(()=> el.hidden = true, 2600);
+}
+
+function hexToRgba(hex, a){
+  const h = (hex||"").replace("#","");
+  const full = h.length===3 ? h.split("").map(x=>x+x).join("") : h;
+  const r = parseInt(full.slice(0,2),16);
+  const g = parseInt(full.slice(2,4),16);
+  const b = parseInt(full.slice(4,6),16);
+  return `rgba(${r},${g},${b},${a})`;
+}
+
+const THEMES = {
+  aqua:   { a1:"#63FFF2", a2:"#9D6BFF", bg:"#070A12", bg2:"#050812", ring:"rgba(99,255,242,.10)" },
+  violet: { a1:"#B38BFF", a2:"#63FFF2", bg:"#070A12", bg2:"#050812", ring:"rgba(179,139,255,.12)" },
+  matrix: { a1:"#5CFF8A", a2:"#63FFF2", bg:"#050A08", bg2:"#040806", ring:"rgba(92,255,138,.12)" },
+  sunset: { a1:"#FFB86B", a2:"#FF4D6D", bg:"#0C0610", bg2:"#07030C", ring:"rgba(255,184,107,.12)" },
+  ice:    { a1:"#7AD1FF", a2:"#63FFF2", bg:"#060A12", bg2:"#04060D", ring:"rgba(122,209,255,.12)" }
+};
+
+function applyTheme(theme){
+  const t = THEMES[theme] || THEMES.aqua;
+  const root = document.documentElement;
+  root.style.setProperty("--a1", t.a1);
+  root.style.setProperty("--a2", t.a2);
+  root.style.setProperty("--bg", t.bg);
+  root.style.setProperty("--bg2", t.bg2);
+  root.style.setProperty("--focusRing", `0 0 0 3px ${t.ring}`);
+  root.style.setProperty("--a3", hexToRgba(t.a1, 0.12));
+  root.style.setProperty("--a4", hexToRgba(t.a2, 0.12));
+  root.style.setProperty("--stroke", hexToRgba(t.a2, 0.18));
+}
+
+/* ===== Level + Badges ===== */
+const LEVELS = [
+  { lvl:1, min:0,    title:"Recruta do Foco" },
+  { lvl:2, min:60,   title:"Cadete da Disciplina" },
+  { lvl:3, min:150,  title:"Operador de Rotina" },
+  { lvl:4, min:280,  title:"Analista de Atenção" },
+  { lvl:5, min:450,  title:"Especialista Anti-Distração" },
+  { lvl:6, min:700,  title:"Mestre do Estudo Profundo" },
+  { lvl:7, min:1000, title:"Lenda do Focus Zone" }
+];
+
+function calcLevel(points){
+  let lvl = 1, title = LEVELS[0].title, nextMin = null, curMin = 0;
+  for(let i=0;i<LEVELS.length;i++){
+    if(points >= LEVELS[i].min){
+      lvl = LEVELS[i].lvl; title = LEVELS[i].title; curMin = LEVELS[i].min;
+      nextMin = (LEVELS[i+1] ? LEVELS[i+1].min : null);
+    }
+  }
+  const span = nextMin ? (nextMin - curMin) : 1;
+  const progress = nextMin ? Math.max(0, Math.min(1, (points - curMin) / span)) : 1;
+  const toNext = nextMin ? Math.max(0, nextMin - points) : 0;
+  return { lvl, title, progress, toNext };
+}
+
+const BADGES = [
+  { id:"first_login", icon:"🚀", name:"Primeiro Acesso", desc:"Entrou no Focus Zone pela primeira vez.", check:(ctx)=>ctx.events.firstLogin===true },
+  { id:"first_post",  icon:"📝", name:"Autor Iniciante", desc:"Publicou seu primeiro post no fórum.", check:(ctx)=>ctx.stats.posts>=1 },
+  { id:"helper",      icon:"🤝", name:"Colaborador", desc:"Fez 5 comentários.", check:(ctx)=>ctx.stats.comments>=5 },
+  { id:"pomodoro",    icon:"🍅", name:"Pomodoro Concluído", desc:"Concluiu 1 Pomodoro.", check:(ctx)=>ctx.stats.pomodoroDone>=1 },
+  { id:"quiz_master", icon:"🧠", name:"Quiz em Dia", desc:"Finalizou 2 quizzes.", check:(ctx)=>ctx.stats.quizzesFinished>=2 },
+  { id:"track_step",  icon:"🧭", name:"Trilheiro", desc:"Concluiu 5 etapas.", check:(ctx)=>ctx.stats.trackStepsDone>=5 },
+  { id:"group_leader",icon:"👑", name:"Líder de Grupo", desc:"Criou grupo e adicionou 1 membro.", check:(ctx)=>ctx.stats.groupsCreated>=1 && ctx.stats.membersAdded>=1 },
+  { id:"memory_win",  icon:"🧩", name:"Memória Perfeita", desc:"Concluiu jogo de memória.", check:(ctx)=>ctx.stats.memoryWins>=1 },
+  { id:"reflex_pro",  icon:"🎯", name:"Reflexo Treinado", desc:"Fez 12+ acertos no Reflexo.", check:(ctx)=>ctx.stats.bestReflexHits>=12 },
+  { id:"lvl5",        icon:"🌟", name:"Nível 5", desc:"Alcançou nível 5.", check:(ctx)=>ctx.level>=5 }
+];
+
+/* ===== Storage ===== */
+const KEY = "FOCUSZONE_APP_ONEFILE_V1"; // novo key para evitar conflito com versões quebradas
+const FORUM_CATEGORIES = [
+  "Foco e Rotina",
+  "Redes Sociais com Consciência",
+  "Técnicas de Estudo",
+  "Saúde Mental e Bem-estar",
+  "Dúvidas e Ajuda",
+  "Recursos e Ferramentas"
+];
+
+const DEFAULT_VIDEOS = [
+  "GMt7fxRDWB0",
+  "gPYn-GROXhg",
+  "WHQ8HfjMS6c",
+  "eGg1qKa9hys",
+  "k5BT8KsVEx4",
+  "p3dlQlHPJns",
+  "dzRjOnJ0Ndw",
+  "PKEsSjZnEYM"
+];
+
+function defaultData(){
+  const d = { session:null, users:{}, forum:{}, groups:[], videos:[...DEFAULT_VIDEOS], tracks:{} };
+  FORUM_CATEGORIES.forEach(cat => d.forum[cat] = { posts: [] });
+  seedInitialForum(d);
+  return d;
+}
+
+function loadData(){
+  try{
+    const raw = localStorage.getItem(KEY);
+    if(!raw){
+      const d = defaultData();
+      localStorage.setItem(KEY, JSON.stringify(d));
+      return d;
+    }
+    const d = JSON.parse(raw);
+    d.session ||= null;
+    d.users ||= {};
+    d.forum ||= {};
+    d.groups ||= [];
+    d.videos ||= [...DEFAULT_VIDEOS];
+    d.tracks ||= {};
+    FORUM_CATEGORIES.forEach(cat => d.forum[cat] ||= { posts: [] });
+    return d;
+  }catch{
+    const d = defaultData();
+    localStorage.setItem(KEY, JSON.stringify(d));
+    return d;
+  }
+}
+function saveData(d){ localStorage.setItem(KEY, JSON.stringify(d)); }
+
+/* ===== Auth hash ===== */
+function hashPass(p){
+  // hash simples (não é segurança real; é protótipo local)
+  let h = 0;
+  for(let i=0;i<p.length;i++){ h = ((h<<5)-h) + p.charCodeAt(i); h|=0; }
+  return "h" + Math.abs(h);
+}
+
+/* ===== Seed forum ===== */
+function seedInitialForum(d){
+  const addPost = (cat, author, title, tags, content) => {
+    const post = { id: uid(), author, title, tags, content, createdAt: nowISO(), updatedAt: nowISO(), comments: [] };
+    d.forum[cat].posts.unshift(post);
+  };
+
+  addPost("Foco e Rotina","admin","Como usar o Pomodoro sem se sabotar",
+    "pomodoro,foco,rotina",
+`O Pomodoro funciona melhor quando você respeita:
+1) Durante o foco: anote distrações e volte depois.
+2) Na pausa: pause de verdade (água, alongamento), sem rolagem infinita.
+
+Comece com 5 ou 15 min e aumente.`);
+
+  addPost("Técnicas de Estudo","admin","Active Recall: aprender de verdade",
+    "active recall,estudo,memorização",
+`Aprendizagem ativa é se testar: perguntas, exercícios, explicar com suas palavras.
+Releitura passiva dá sensação de progresso, mas retém pouco.`);
+
+  addPost("Redes Sociais com Consciência","admin","Como evitar a rolagem infinita",
+    "redes sociais,limite,consciência",
+`Antes de abrir qualquer app:
+- Objetivo? (pesquisar? falar com alguém?)
+- Tempo? (ex.: 10 min)
+- Ao terminar: sair.
+
+Internet como ferramenta, não piloto automático.`);
+}
+
+/* ===== Tracks + Quizzes ===== */
+const TRACKS = {
+  ENEM: { id:"ENEM", name:"Trilha ENEM", desc:"Constância, questões e revisão espaçada.",
+    steps:[
+      { id:"enem_1", title:"Definir meta semanal", tip:"Ex.: 6h/semana, 3 matérias." },
+      { id:"enem_2", title:"Organizar rotina (Pomodoro)", tip:"Comece com 15 min." },
+      { id:"enem_3", title:"Resolver 20 questões", tip:"Registre erros e padrões." },
+      { id:"enem_4", title:"Revisão espaçada", tip:"24h / 7d / 30d." },
+      { id:"enem_5", title:"Redação: intro + conclusão", tip:"Treine estrutura." },
+      { id:"enem_6", title:"Simulado curto", tip:"Depois corrija." },
+      { id:"enem_7", title:"Revisar lista de erros", tip:"Prioridade total." },
+      { id:"enem_8", title:"Semana de constância", tip:"Mesmo pouco, mantenha." }
+    ]
+  },
+  PROG: { id:"PROG", name:"Trilha Programação", desc:"Aprenda com prática e projetos.",
+    steps:[
+      { id:"prog_1", title:"Escolher linguagem", tip:"JS ou Python por 30 dias." },
+      { id:"prog_2", title:"Base: if/loops", tip:"Exercícios curtos." },
+      { id:"prog_3", title:"Funções", tip:"Quebre problemas." },
+      { id:"prog_4", title:"Mini-projeto", tip:"to-do/quiz." },
+      { id:"prog_5", title:"Git básico", tip:"commit/push." },
+      { id:"prog_6", title:"UI/CLI", tip:"Interação real." },
+      { id:"prog_7", title:"Debug", tip:"Leia erros e isole causas." },
+      { id:"prog_8", title:"Projeto final", tip:"Entregável simples." }
+    ]
+  }
+};
+
+const QUIZZES = {
+  "Foco e Distrações":[
+    { q:"Estratégia eficaz para reduzir distrações ao estudar online?",
+      a:["Abrir várias abas","Ativar notificações","Usar timer + reduzir estímulos","Celular na mão"], c:2,
+      e:"Timer + redução de estímulos diminui troca de contexto." },
+    { q:"O que mais prejudica o foco?",
+      a:["Meta clara","Interrupções frequentes","Ambiente silencioso","Rotina consistente"], c:1,
+      e:"Interrupções quebram atenção e aumentam tempo de retomada." },
+    { q:"Melhor hábito antes de abrir rede social:",
+      a:["Entrar sem objetivo","Definir propósito e limite","Dormir menos","Responder tudo"], c:1,
+      e:"Intenção + limite evita rolagem infinita." },
+    { q:"Para aprender com consistência, melhor é:",
+      a:["Sessões curtas e frequentes","Maratona mensal 10h","Só com vontade","Trocar de assunto"], c:0,
+      e:"Consistência é o motor do progresso." }
+  ],
+  "Técnicas de Estudo":[
+    { q:"O que é revisão espaçada?", a:["Repetir tudo no dia","Revisar em intervalos","Estudar só uma vez","Revisar só na véspera"], c:1,
+      e:"Intervalos aumentam retenção de longo prazo." },
+    { q:"Técnica Feynman significa:", a:["Copiar resumo","Explicar simples","Memorizar sem entender","Só vídeo"], c:1,
+      e:"Explicar revela lacunas e fixa conhecimento." },
+    { q:"Como evitar leitura passiva?", a:["Sublinhar tudo","Fazer perguntas e se testar","Ler rápido","Abrir várias fontes"], c:1,
+      e:"Active recall é muito eficiente." },
+    { q:"Uma boa meta de estudo é:", a:["Estudar muito","Ser melhor","Resolver 20 questões","Ver redes menos"], c:2,
+      e:"Metas específicas guiam execução." }
+  ],
+  "Redes Sociais com Consciência":[
+    { q:"O que é rolagem infinita?", a:["Parar em 10","Feed que não acaba","Só vídeos educativos","Sair no final"], c:1,
+      e:"Feed sem fim incentiva consumo contínuo." },
+    { q:"Prática que reduz uso impulsivo?", a:["Ícone na tela","Notificações","Remover atalhos e usar limite","Dormir com celular"], c:2,
+      e:"Aumentar atrito reduz hábito automático." },
+    { q:"Para pesquisa online é melhor:", a:["Abrir qualquer link","Definir palavra-chave e objetivo","Seguir trends","Pesquisar com pressa"], c:1,
+      e:"Objetivo evita dispersão." },
+    { q:"Para bem-estar é recomendado:", a:["Comparar-se sempre","Curadoria e limites","Responder tudo","Dormir menos"], c:1,
+      e:"Curadoria e limites ajudam." }
+  ]
+};
+
+/* ===== App state ===== */
+let DATA = loadData();
+let ME = null;
+
+/* ===== Navigation ===== */
+function setView(name){
+  $$(".nav").forEach(b => b.classList.toggle("active", b.dataset.view === name));
+  $$(".panel").forEach(p => p.classList.remove("active"));
+  $(`#view-${name}`).classList.add("active");
+  onEnterView(name);
+}
+$$(".nav").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    if(!ME){ setView("auth"); return; }
+    setView(btn.dataset.view);
+  });
+});
+
+$("#btnLogout").addEventListener("click", ()=>{
+  DATA.session = null;
+  saveData(DATA);
+  ME = null;
+  paintMe();
+  setView("auth");
+});
+
+/* ===== User helpers ===== */
+function fallbackAvatar(letter){
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="128" height="128">
+      <rect width="100%" height="100%" rx="24" ry="24" fill="rgba(99,255,242,.12)"/>
+      <text x="50%" y="54%" font-size="58" text-anchor="middle" fill="rgba(234,242,255,.9)" font-family="Arial" font-weight="900">${(letter||"U").toUpperCase()}</text>
+    </svg>`;
+  return "data:image/svg+xml,"+encodeURIComponent(svg);
+}
+
+function ensureUserSchema(u){
+  u.displayName ||= "";
+  u.bio ||= "";
+  u.avatarDataUrl ||= "";
+  u.points ||= 0;
+  u.goal = (u.goal ?? 30);
+  u.privacy ||= "public";
+  u.notifs ||= "off";
+  u.theme ||= "aqua";
+  u.checklist ||= { notifs:false, desk:false, goal:false, tabs:false, phone:false };
+  u.dayStamp ||= new Date().toDateString();
+  u.dayPoints ||= 0;
+  u.badges ||= [];
+  u.stats ||= { posts:0, comments:0, pomodoroDone:0, quizzesFinished:0, trackStepsDone:0, groupsCreated:0, membersAdded:0, memoryWins:0, bestReflexHits:0 };
+  u.events ||= {};
+}
+
+function ensureTrackUser(){
+  DATA.tracks[ME] ||= {};
+  for(const k of Object.keys(TRACKS)){
+    DATA.tracks[ME][k] ||= { done:{}, notes:"" };
+  }
+}
+
+function paintMe(){
+  const pill = $("#mePill");
+  const btn = $("#btnLogout");
+  if(!ME){
+    pill.hidden = true;
+    btn.hidden = true;
+    return;
+  }
+  const u = DATA.users[ME];
+  ensureUserSchema(u);
+
+  applyTheme(u.theme || "aqua");
+
+  const av = u.avatarDataUrl || fallbackAvatar(ME[0]);
+  $("#meAvatar").src = av;
+  $("#pAvatar").src = av;
+
+  const lvl = calcLevel(u.points||0);
+  $("#meName").textContent = u.displayName || ME;
+  $("#mePoints").textContent = u.points ?? 0;
+  $("#meGoal").textContent = u.goal ?? 30;
+  $("#meLevel").textContent = lvl.lvl;
+
+  $("#homePoints").textContent = u.points ?? 0;
+  $("#homeGoal").textContent = u.goal ?? 30;
+  $("#homeLevel").textContent = lvl.lvl;
+
+  const today = new Date().toDateString();
+  if(u.dayStamp !== today){
+    u.dayStamp = today;
+    u.dayPoints = 0;
+    saveData(DATA);
+  }
+  $("#homeDayPts").textContent = u.dayPoints ?? 0;
+  const goal = Math.max(1, Number(u.goal||30));
+  const pct = Math.max(0, Math.min(100, ((u.dayPoints||0)/goal)*100));
+  $("#homeGoalBar").style.width = pct + "%";
+
+  $("#pName").value = u.displayName || "";
+  $("#pBio").value = u.bio || "";
+  $("#pGoal").value = u.goal ?? 30;
+  $("#pPrivacy").value = u.privacy || "public";
+  $("#pTheme").value = u.theme || "aqua";
+
+  $$(".ck").forEach(ck=>{
+    const k = ck.dataset.ck;
+    ck.checked = !!(u.checklist?.[k]);
+  });
+
+  pill.hidden = false;
+  btn.hidden = false;
+}
+
+function addPoints(delta){
+  const u = DATA.users[ME];
+  ensureUserSchema(u);
+
+  u.points = (u.points||0) + delta;
+
+  const today = new Date().toDateString();
+  if(u.dayStamp !== today){
+    u.dayStamp = today;
+    u.dayPoints = 0;
+  }
+  u.dayPoints = (u.dayPoints||0) + Math.max(0, delta);
+  saveData(DATA);
+
+  paintMe();
+  evaluateBadges();
+}
+
+function getCtx(){
+  const u = DATA.users[ME];
+  ensureUserSchema(u);
+  const lvl = calcLevel(u.points||0);
+  return { user:u, level:lvl.lvl, stats:u.stats||{}, events:u.events||{} };
+}
+function unlockBadge(id){
+  const u = DATA.users[ME];
+  ensureUserSchema(u);
+  if(u.badges.includes(id)) return false;
+  u.badges.push(id);
+  saveData(DATA);
+  return true;
+}
+function evaluateBadges(){
+  if(!ME) return;
+  const ctx = getCtx();
+  const unlocked = [];
+  for(const b of BADGES){
+    if(ctx.user.badges.includes(b.id)) continue;
+    if(b.check(ctx)){
+      if(unlockBadge(b.id)) unlocked.push(b.name);
+    }
+  }
+  if(unlocked.length) toast($("#badgeToast"), "Badge desbloqueado: " + unlocked.join(", "));
+  renderBadges();
+}
+
+/* =========================
+   LOGIN/CADASTRO (CORRIGIDO)
+========================= */
+function normalizeUser(s){
+  return (s||"").trim().toLowerCase().replace(/\s+/g,"");
+}
+
+function loginAs(username){
+  ME = username;
+  DATA.session = username;
+  ensureUserSchema(DATA.users[ME]);
+  ensureTrackUser();
+
+  const u = DATA.users[ME];
+  if(!u.events.firstLogin){
+    u.events.firstLogin = true;
+    saveData(DATA);
+  }
+  applyTheme(u.theme || "aqua");
+  paintMe();
+  setView("home");
+  evaluateBadges();
+}
+
+$("#btnRegister").addEventListener("click", ()=>{
+  const t = $("#authToast");
+  const u = normalizeUser($("#regUser").value);
+  const p = String($("#regPass").value || "");
+
+  if(u.length < 3) return toast(t, "Usuário mínimo 3 caracteres.", true);
+  if(p.length < 6) return toast(t, "Senha mínimo 6 caracteres.", true);
+  if(DATA.users[u]) return toast(t, "Usuário já existe.", true);
+
+  DATA.users[u] = {
+    passHash: hashPass(p)
+  };
+  ensureUserSchema(DATA.users[u]);
+
+  // Nome padrão:
+  DATA.users[u].displayName = u;
+
+  saveData(DATA);
+  toast(t, "Conta criada! Agora faça login.", false);
+
+  // preenche login automaticamente
+  $("#loginUser").value = u;
+  $("#loginPass").value = "";
+});
+
+$("#btnLogin").addEventListener("click", ()=>{
+  const t = $("#authToast");
+  const u = normalizeUser($("#loginUser").value);
+  const p = String($("#loginPass").value || "");
+  const user = DATA.users[u];
+
+  if(!u) return toast(t, "Informe o usuário.", true);
+  if(!p) return toast(t, "Informe a senha.", true);
+  if(!user) return toast(t, "Usuário não encontrado. Faça cadastro.", true);
+
+  if(user.passHash !== hashPass(p)){
+    return toast(t, "Senha inválida.", true);
+  }
+
+  loginAs(u);
+});
+
+document.addEventListener("keydown", (e)=>{
+  if(e.key === "Enter" && !ME){
+    // Enter para logar rapidamente
+    $("#btnLogin").click();
+  }
+});
+
+/* ===== Checklist ===== */
+$$(".ck").forEach(ck=>{
+  ck.addEventListener("change", ()=>{
+    const u = DATA.users[ME];
+    ensureUserSchema(u);
+    u.checklist[ck.dataset.ck] = ck.checked;
+    saveData(DATA);
+  });
+});
+
+/* ===== Home actions ===== */
+$("#btnQuickReward").addEventListener("click", ()=>{
+  addPoints(5);
+  toast($("#homeToast"), "Disciplina registrada: +5 pts");
+});
+$("#btnResetDay").addEventListener("click", ()=>{
+  const u = DATA.users[ME];
+  ensureUserSchema(u);
+  u.dayStamp = new Date().toDateString();
+  u.dayPoints = 0;
+  saveData(DATA);
+  paintMe();
+  toast($("#homeToast"), "Meta do dia reiniciada.");
+});
+
+/* =========================
+   YouTube (fix)
+========================= */
+function extractYouTubeId(input){
+  const s = (input||"").trim();
+  if(!s) return null;
+  if(/^[a-zA-Z0-9_-]{11}$/.test(s)) return s;
+  try{
+    const url = new URL(s);
+    const host = url.hostname.replace("www.","").toLowerCase();
+    if(host === "youtu.be"){
+      const id = url.pathname.split("/").filter(Boolean)[0] || "";
+      return /^[a-zA-Z0-9_-]{11}$/.test(id) ? id : null;
+    }
+    if(host.endsWith("youtube.com")){
+      const v = url.searchParams.get("v");
+      if(v && /^[a-zA-Z0-9_-]{11}$/.test(v)) return v;
+      const parts = url.pathname.split("/").filter(Boolean);
+      const shortsIdx = parts.indexOf("shorts");
+      if(shortsIdx >= 0 && parts[shortsIdx+1]){
+        const id = parts[shortsIdx+1];
+        return /^[a-zA-Z0-9_-]{11}$/.test(id) ? id : null;
+      }
+      const embedIdx = parts.indexOf("embed");
+      if(embedIdx >= 0 && parts[embedIdx+1]){
+        const id = parts[embedIdx+1];
+        return /^[a-zA-Z0-9_-]{11}$/.test(id) ? id : null;
+      }
+    }
+  }catch{}
+  const m = s.match(/[?&]v=([a-zA-Z0-9_-]{11})/);
+  if(m) return m[1];
+  return null;
+}
+
+function renderVideos(){
+  const grid = $("#videoGrid");
+  const vids = DATA.videos || [];
+  if(!vids.length){
+    grid.innerHTML = `<div class="muted">Sem vídeos. Adicione um acima.</div>`;
+    return;
+  }
+  grid.innerHTML = vids.map(id => `
+    <div class="card videoCard">
+      <div class="row between">
+        <div><b>Vídeo</b> <span class="muted tiny">ID: ${esc(id)}</span></div>
+        <button class="btn ghost" data-delvid="${esc(id)}">Remover</button>
+      </div>
+      <iframe
+        src="https://www.youtube.com/embed/${esc(id)}?rel=0&modestbranding=1"
+        title="YouTube video"
+        frameborder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowfullscreen></iframe>
+    </div>
+  `).join("");
+
+  $$("[data-delvid]").forEach(b=>{
+    b.addEventListener("click", ()=>{
+      const id = b.dataset.delvid;
+      DATA.videos = (DATA.videos||[]).filter(x => x !== id);
+      saveData(DATA);
+      renderVideos();
+      toast($("#videoToast"), "Vídeo removido.");
+    });
+  });
+}
+$("#btnSaveVideo").addEventListener("click", ()=>{
+  const raw = $("#videoInput").value;
+  const t = $("#videoToast");
+  const id = extractYouTubeId(raw);
+  if(!id) return toast(t, "Cole um link do YouTube ou um ID válido.", true);
+  DATA.videos ||= [];
+  if(DATA.videos.includes(id)) return toast(t, "Esse vídeo já existe.", true);
+  DATA.videos.unshift(id);
+  saveData(DATA);
+  $("#videoInput").value = "";
+  renderVideos();
+  toast(t, "Vídeo adicionado!");
+});
+$("#btnResetVideos").addEventListener("click", ()=>{
+  DATA.videos = [...DEFAULT_VIDEOS];
+  saveData(DATA);
+  renderVideos();
+  toast($("#videoToast"), "Lista padrão restaurada.");
+});
+
+/* =========================
+   Tracks
+========================= */
+function initTrackSelect(){
+  $("#trackSelect").innerHTML = Object.values(TRACKS).map(t=>`<option value="${t.id}">${esc(t.name)}</option>`).join("");
+}
+function getTrackState(trackId){
+  ensureTrackUser();
+  return DATA.tracks[ME][trackId];
+}
+function renderTrack(){
+  const trackId = $("#trackSelect").value;
+  const t = TRACKS[trackId];
+  const state = getTrackState(trackId);
+
+  $("#trackTitle").textContent = t.name;
+  $("#trackDesc").textContent = t.desc;
+  $("#trackNotes").value = state.notes || "";
+
+  const done = state.done || {};
+  const total = t.steps.length;
+  const doneCount = t.steps.filter(s => !!done[s.id]).length;
+  const pct = total ? Math.round((doneCount/total)*100) : 0;
+
+  $("#trackProgressTxt").textContent = pct + "%";
+  $("#trackStepsTxt").textContent = `${doneCount}/${total}`;
+  $("#trackBar").style.width = pct + "%";
+
+  $("#trackSteps").innerHTML = t.steps.map(s=>{
+    const isDone = !!done[s.id];
+    return `
+      <div class="cardItem">
+        <div class="meta">${isDone ? "✅ concluído" : "⏳ pendente"}</div>
+        <div class="title">${esc(s.title)}</div>
+        <div class="muted tiny">${esc(s.tip||"")}</div>
+        <div class="actions">
+          <button class="btn ${isDone ? "ghost" : ""}" data-step="${esc(s.id)}" ${isDone?"disabled":""}>
+            ${isDone ? "Concluído" : "Concluir etapa (+6 pts)"}
+          </button>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  $$("[data-step]").forEach(b=>{
+    b.addEventListener("click", ()=>{
+      const stepId = b.dataset.step;
+      const st = getTrackState(trackId);
+      st.done ||= {};
+      if(st.done[stepId]) return;
+      st.done[stepId] = true;
+
+      const u = DATA.users[ME];
+      ensureUserSchema(u);
+      u.stats.trackStepsDone = (u.stats.trackStepsDone||0) + 1;
+
+      saveData(DATA);
+      addPoints(6);
+      toast($("#trackToast"), "Etapa concluída! +6 pts");
+      renderTrack();
+    });
+  });
+}
+$("#trackSelect").addEventListener("change", renderTrack);
+$("#btnSaveTrackNotes").addEventListener("click", ()=>{
+  const trackId = $("#trackSelect").value;
+  const st = getTrackState(trackId);
+  st.notes = $("#trackNotes").value.slice(0, 4000);
+  saveData(DATA);
+  toast($("#trackToast"), "Notas salvas!");
+});
+$("#btnTrackReset").addEventListener("click", ()=>{
+  const trackId = $("#trackSelect").value;
+  const st = getTrackState(trackId);
+  st.done = {};
+  st.notes = "";
+  saveData(DATA);
+  toast($("#trackToast"), "Trilha reiniciada.");
+  renderTrack();
+});
+
+/* =========================
+   Quiz
+========================= */
+let quizState = { started:false, name:"", idx:0, score:0, finishedSet:{} };
+function initQuizSelect(){
+  $("#quizSelect").innerHTML = Object.keys(QUIZZES).map(k=>`<option value="${esc(k)}">${esc(k)}</option>`).join("");
+}
+function renderQuiz(){
+  const box = $("#quizBox");
+  if(!quizState.started){
+    box.innerHTML = `<b>Escolha um tema e clique em “Começar”.</b>`;
+    $("#quizScorePill").hidden = true;
+    $("#quizProgressPill").hidden = true;
+    return;
+  }
+  const qs = QUIZZES[quizState.name];
+  $("#quizScorePill").hidden = false;
+  $("#quizProgressPill").hidden = false;
+  $("#quizScore").textContent = quizState.score;
+  $("#quizProgress").textContent = `${Math.min(quizState.idx+1, qs.length)}/${qs.length}`;
+
+  if(quizState.idx >= qs.length){
+    box.innerHTML = `<h3>Concluído!</h3><p class="muted">Score: <b>${quizState.score}</b></p>`;
+    const u = DATA.users[ME]; ensureUserSchema(u);
+    if(!quizState.finishedSet[quizState.name]){
+      quizState.finishedSet[quizState.name] = true;
+      u.stats.quizzesFinished = (u.stats.quizzesFinished||0) + 1;
+      saveData(DATA);
+      evaluateBadges();
+    }
+    $("#btnQuizReset").disabled = false;
+    toast($("#quizToast"), "Quiz finalizado!");
+    return;
+  }
+  const q = qs[quizState.idx];
+  box.innerHTML = `
+    <div class="muted tiny">Pergunta</div>
+    <h3>${esc(q.q)}</h3>
+    <div class="listCards" style="margin-top:10px">
+      ${q.a.map((txt,i)=>`<button class="btn ghost" data-qa="${i}">${esc(txt)}</button>`).join("")}
+    </div>
+    <div class="toast" id="quizExplain" hidden></div>
+  `;
+  $$("[data-qa]").forEach(b=>{
+    b.addEventListener("click", ()=>{
+      const i = Number(b.dataset.qa);
+      const explain = $("#quizExplain");
+      const ok = i === q.c;
+      explain.hidden = false;
+      explain.classList.toggle("err", !ok);
+      explain.textContent = (ok ? "✔ " : "✖ ") + q.e;
+      if(ok){ quizState.score += 10; addPoints(10); toast($("#quizToast"), "Acertou! +10 pts"); }
+      setTimeout(()=>{ quizState.idx++; renderQuiz(); }, 850);
+    });
+  });
+}
+$("#btnQuizStart").addEventListener("click", ()=>{
+  quizState.started = true;
+  quizState.name = $("#quizSelect").value;
+  quizState.idx = 0;
+  quizState.score = 0;
+  $("#btnQuizReset").disabled = false;
+  renderQuiz();
+});
+$("#btnQuizReset").addEventListener("click", ()=>{
+  quizState.started = true;
+  quizState.name = $("#quizSelect").value;
+  quizState.idx = 0;
+  quizState.score = 0;
+  renderQuiz();
+});
+
+/* =========================
+   Pomodoro
+========================= */
+let pom = { total:1500, left:1500, running:false, pauses:0, h:null };
+function fmt(sec){
+  const m = Math.floor(sec/60);
+  const s = sec%60;
+  return `${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+}
+function paintPom(){
+  $("#pomText").textContent = fmt(pom.left);
+  $("#pomPause").disabled = !pom.running;
+  $("#pomReset").disabled = pom.running ? false : (pom.left===pom.total);
+}
+function stopPom(){
+  if(pom.h) clearInterval(pom.h);
+  pom.h = null; pom.running=false;
+  paintPom();
+}
+$("#pomPreset").addEventListener("change", ()=>{
+  const m = Number($("#pomPreset").value);
+  pom.total = m*60; pom.left = m*60; pom.pauses = 0;
+  stopPom(); paintPom();
+});
+$("#pomStart").addEventListener("click", ()=>{
+  if(pom.running) return;
+  pom.running = true; paintPom();
+  pom.h = setInterval(()=>{
+    pom.left--;
+    if(pom.left <= 0){
+      pom.left = 0; stopPom();
+      const base = 10;
+      const reward = Math.max(2, base - pom.pauses*2);
+      const u = DATA.users[ME]; ensureUserSchema(u);
+      u.stats.pomodoroDone = (u.stats.pomodoroDone||0) + 1;
+      saveData(DATA);
+      addPoints(reward);
+      toast($("#pomToast"), `Ciclo concluído! +${reward} pts`);
+      pom.pauses = 0;
+      evaluateBadges();
+      return;
+    }
+    paintPom();
+  }, 1000);
+});
+$("#pomPause").addEventListener("click", ()=>{
+  if(!pom.running) return;
+  pom.pauses++; stopPom();
+  toast($("#pomToast"), "Pausado. Volte quando estiver pronto.");
+});
+$("#pomReset").addEventListener("click", ()=>{
+  stopPom(); pom.left = pom.total; pom.pauses = 0; paintPom();
+});
+
+/* =========================
+   Reflex
+========================= */
+let ref = { running:false, end:0, spawn:null, stop:null, hit:0, miss:0, combo:0 };
+function placeCore(){
+  const arena = $("#arena");
+  const core = $("#core");
+  const rect = arena.getBoundingClientRect();
+  const pad = 18;
+  const x = pad + Math.random() * (rect.width - pad*2 - 56);
+  const y = 56 + Math.random() * (rect.height - 56 - pad*2 - 56);
+  core.style.left = `${x}px`;
+  core.style.top = `${y}px`;
+  core.hidden = false;
+  setTimeout(()=>{
+    if(!ref.running) return;
+    if(core.hidden) return;
+    core.hidden = true;
+    ref.miss++; ref.combo=0;
+    $("#miss").textContent = ref.miss;
+    $("#combo").textContent = ref.combo;
+  }, 700);
+}
+function endRef(){
+  if(!ref.running) return;
+  ref.running = false;
+  clearInterval(ref.spawn);
+  clearTimeout(ref.stop);
+  $("#core").hidden = true;
+  $("#refStart").disabled = false;
+  $("#refStop").disabled = true;
+
+  const pts = Math.max(0, ref.hit*2 + Math.floor(ref.hit/5));
+  const u = DATA.users[ME]; ensureUserSchema(u);
+  u.stats.bestReflexHits = Math.max(u.stats.bestReflexHits||0, ref.hit);
+  saveData(DATA);
+
+  if(pts>0){ addPoints(pts); toast($("#refToast"), `Rodada final: +${pts} pts`); }
+  else toast($("#refToast"), "Rodada final: tente de novo!", true);
+  evaluateBadges();
+}
+$("#refStart").addEventListener("click", ()=>{
+  if(ref.running) return;
+  ref.running=true;
+  ref.hit=0; ref.miss=0; ref.combo=0;
+  $("#hit").textContent="0"; $("#miss").textContent="0"; $("#combo").textContent="0";
+  $("#refStart").disabled=true; $("#refStop").disabled=false;
+  ref.end = Date.now()+30000;
+  placeCore();
+  ref.spawn = setInterval(()=>{ if(ref.running && $("#core").hidden && Date.now()<ref.end) placeCore(); }, 120);
+  ref.stop = setTimeout(()=> endRef(), 30000);
+});
+$("#refStop").addEventListener("click", ()=> endRef());
+$("#core").addEventListener("click", ()=>{
+  if(!ref.running) return;
+  $("#core").hidden = true;
+  ref.hit++; ref.combo++;
+  $("#hit").textContent = ref.hit;
+  $("#combo").textContent = ref.combo;
+});
+
+/* =========================
+   Memory
+========================= */
+let mem = { level:"easy", cards:[], first:null, lock:false, tries:0, found:0, pairs:0 };
+function symbolsForLevel(level){
+  const base = ["⚡","🧠","📚","🎯","🧩","⏱️","🌐","🚀","🔒","🛰️","🧬","🧿"];
+  if(level==="easy") return base.slice(0,6);
+  if(level==="med") return base.slice(0,8);
+  return base.slice(0,10);
+}
+function shuffle(a){
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+function newMemory(){
+  mem.level = $("#memLevel").value;
+  const syms = symbolsForLevel(mem.level);
+  mem.pairs = syms.length;
+  mem.cards = shuffle([...syms, ...syms].map((s, idx)=>({ id: idx, s, revealed:false, matched:false })));
+  mem.first=null; mem.lock=false; mem.tries=0; mem.found=0;
+  $("#memPairs").textContent = mem.pairs;
+  $("#memTries").textContent = mem.tries;
+  $("#memFound").textContent = mem.found;
+  renderMemory();
+  toast($("#memToast"), "Novo jogo iniciado.");
+}
+function renderMemory(){
+  $("#memGrid").innerHTML = mem.cards.map(c=>{
+    const cls = ["memCard"];
+    if(c.revealed) cls.push("revealed");
+    if(c.matched) cls.push("matched");
+    const txt = (c.revealed || c.matched) ? c.s : "◼";
+    return `<div class="${cls.join(" ")}" data-mem="${c.id}">${txt}</div>`;
+  }).join("");
+  $$("[data-mem]").forEach(el=> el.addEventListener("click", ()=> clickMem(Number(el.dataset.mem))));
+}
+function clickMem(id){
+  if(mem.lock) return;
+  const c = mem.cards.find(x=>x.id===id);
+  if(!c || c.matched || c.revealed) return;
+
+  c.revealed=true;
+  renderMemory();
+
+  if(!mem.first){ mem.first=c; return; }
+
+  mem.tries++; $("#memTries").textContent = mem.tries;
+
+  if(mem.first.s === c.s){
+    c.matched=true; mem.first.matched=true;
+    mem.found++; $("#memFound").textContent = mem.found;
+    mem.first=null;
+    addPoints(2);
+    toast($("#memToast"), "Par encontrado! +2 pts");
+    if(mem.found===mem.pairs){
+      const bonus = Math.max(0, 10 - Math.floor(mem.tries/3));
+      const u = DATA.users[ME]; ensureUserSchema(u);
+      u.stats.memoryWins = (u.stats.memoryWins||0) + 1;
+      saveData(DATA);
+      if(bonus>0) addPoints(bonus);
+      toast($("#memToast"), `Concluído! Bônus: +${bonus} pts`);
+      evaluateBadges();
+    }
+  } else {
+    mem.lock=true;
+    const a = mem.first; mem.first=null;
+    setTimeout(()=>{
+      a.revealed=false; c.revealed=false;
+      mem.lock=false;
+      renderMemory();
+    }, 650);
+  }
+}
+$("#memNew").addEventListener("click", newMemory);
+
+/* =========================
+   Forum
+========================= */
+function ensureForumCategoriesUI(){
+  $("#forumCategory").innerHTML = FORUM_CATEGORIES.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join("");
+}
+let forumState = { selectedPostId:null, currentCategory: FORUM_CATEGORIES[0], lastSearch:"" };
+function getPosts(cat){ return (DATA.forum?.[cat]?.posts) || []; }
+function renderPosts(){
+  const cat = $("#forumCategory").value;
+  forumState.currentCategory = cat;
+  const q = (forumState.lastSearch||"").toLowerCase().trim();
+  let posts = getPosts(cat);
+  if(q){
+    posts = posts.filter(p =>
+      (p.title||"").toLowerCase().includes(q) ||
+      (p.content||"").toLowerCase().includes(q) ||
+      (p.tags||"").toLowerCase().includes(q) ||
+      (p.author||"").toLowerCase().includes(q)
+    );
+  }
+  const list = $("#postsList");
+  if(posts.length===0){ list.innerHTML = `<div class="muted">Sem posts.</div>`; return; }
+  list.innerHTML = posts.map(p=>{
+    const tags = (p.tags||"").split(",").map(x=>x.trim()).filter(Boolean).slice(0,6);
+    return `
+      <div class="cardItem">
+        <div class="meta">${esc(p.createdAt)} • por <b>${esc(p.author)}</b></div>
+        <div class="title">${esc(p.title)}</div>
+        <div class="muted tiny">${esc((p.content||"").slice(0,160))}${(p.content||"").length>160?"...":""}</div>
+        <div class="chips">${tags.map(t=>`<span class="chip">${esc(t)}</span>`).join("")}</div>
+        <div class="actions"><button class="btn ghost" data-openpost="${esc(p.id)}">Abrir</button></div>
+      </div>
+    `;
+  }).join("");
+  $$("[data-openpost]").forEach(b=> b.addEventListener("click", ()=> openPost(b.dataset.openpost)));
+}
+function openPost(postId){
+  const cat = forumState.currentCategory;
+  const p = getPosts(cat).find(x=>x.id===postId);
+  if(!p) return;
+  forumState.selectedPostId = postId;
+  $("#postDetailCard").hidden = false;
+  $("#detailTitle").textContent = p.title;
+  $("#detailMeta").textContent = `${p.createdAt} • por ${p.author} • atualizado: ${p.updatedAt}`;
+  $("#detailContent").textContent = p.content;
+  const tags = (p.tags||"").split(",").map(x=>x.trim()).filter(Boolean);
+  $("#detailTags").innerHTML = tags.map(t=>`<span class="chip">${esc(t)}</span>`).join("");
+  const canEdit = p.author === ME;
+  $("#btnPostEdit").hidden = !canEdit;
+  $("#btnPostDelete").hidden = !canEdit;
+  renderComments(p);
+}
+function closePost(){ forumState.selectedPostId=null; $("#postDetailCard").hidden=true; }
+$("#btnPostClose").addEventListener("click", closePost);
+
+function renderComments(post){
+  const list = $("#commentsList");
+  const cs = post.comments || [];
+  if(cs.length===0){ list.innerHTML = `<div class="muted">Sem comentários.</div>`; return; }
+  list.innerHTML = cs.map(c=>{
+    const mine = c.author === ME;
+    return `
+      <div class="cardItem">
+        <div class="meta">${esc(c.createdAt)} • <b>${esc(c.author)}</b></div>
+        <div style="white-space:pre-wrap; margin-top:6px">${esc(c.content)}</div>
+        ${mine ? `
+          <div class="actions">
+            <button class="btn ghost" data-cedit="${esc(c.id)}">Editar</button>
+            <button class="btn ghost" data-cdel="${esc(c.id)}">Excluir</button>
+          </div>` : ``}
+      </div>`;
+  }).join("");
+  $$("[data-cedit]").forEach(b=> b.addEventListener("click", ()=> editComment(b.dataset.cedit)));
+  $$("[data-cdel]").forEach(b=> b.addEventListener("click", ()=> deleteComment(b.dataset.cdel)));
+}
+
+$("#btnPostCreate").addEventListener("click", ()=>{
+  const cat = $("#forumCategory").value;
+  const title = $("#postTitle").value.trim().slice(0,100);
+  const tags = $("#postTags").value.trim().slice(0,120);
+  const content = $("#postContent").value.trim().slice(0,5000);
+  const t = $("#forumToast");
+  if(!title || !content) return toast(t, "Título e conteúdo são obrigatórios.", true);
+
+  const post = { id: uid(), author: ME, title, tags, content, createdAt: nowISO(), updatedAt: nowISO(), comments: [] };
+  DATA.forum[cat].posts.unshift(post);
+
+  const u = DATA.users[ME]; ensureUserSchema(u);
+  u.stats.posts = (u.stats.posts||0) + 1;
+
+  saveData(DATA);
+  $("#postTitle").value=""; $("#postTags").value=""; $("#postContent").value="";
+  addPoints(3);
+  toast(t, "Post publicado! +3 pts");
+  renderPosts();
+  openPost(post.id);
+  evaluateBadges();
+});
+
+$("#btnForumSearch").addEventListener("click", ()=>{ forumState.lastSearch = $("#forumSearch").value; renderPosts(); });
+$("#forumCategory").addEventListener("change", ()=>{ forumState.lastSearch=""; $("#forumSearch").value=""; closePost(); renderPosts(); });
+
+$("#btnPostEdit").addEventListener("click", ()=>{
+  const cat = forumState.currentCategory;
+  const p = getPosts(cat).find(x=>x.id===forumState.selectedPostId);
+  if(!p) return;
+  const title = prompt("Editar título:", p.title); if(title===null) return;
+  const tags = prompt("Editar tags:", p.tags||""); if(tags===null) return;
+  const content = prompt("Editar conteúdo:", p.content); if(content===null) return;
+  p.title = String(title).trim().slice(0,100);
+  p.tags = String(tags).trim().slice(0,120);
+  p.content = String(content).trim().slice(0,5000);
+  p.updatedAt = nowISO();
+  saveData(DATA);
+  toast($("#forumToast"), "Post atualizado.");
+  renderPosts();
+  openPost(p.id);
+});
+
+$("#btnPostDelete").addEventListener("click", ()=>{
+  const cat = forumState.currentCategory;
+  const posts = getPosts(cat);
+  const idx = posts.findIndex(x=>x.id===forumState.selectedPostId);
+  if(idx<0) return;
+  if(!confirm("Excluir este post?")) return;
+  posts.splice(idx,1);
+  saveData(DATA);
+  toast($("#forumToast"), "Post excluído.");
+  closePost();
+  renderPosts();
+});
+
+$("#btnCommentCreate").addEventListener("click", ()=>{
+  const cat = forumState.currentCategory;
+  const p = getPosts(cat).find(x=>x.id===forumState.selectedPostId);
+  const txt = $("#commentText").value.trim().slice(0,2000);
+  const t = $("#commentToast");
+  if(!p) return;
+  if(!txt) return toast(t, "Comentário vazio.", true);
+  p.comments ||= [];
+  p.comments.push({ id: uid(), author: ME, content: txt, createdAt: nowISO(), updatedAt: nowISO() });
+
+  const u = DATA.users[ME]; ensureUserSchema(u);
+  u.stats.comments = (u.stats.comments||0) + 1;
+
+  $("#commentText").value = "";
+  saveData(DATA);
+  addPoints(1);
+  toast(t, "Comentário publicado! +1 pt");
+  renderComments(p);
+  evaluateBadges();
+});
+function editComment(commentId){
+  const cat = forumState.currentCategory;
+  const p = getPosts(cat).find(x=>x.id===forumState.selectedPostId);
+  if(!p) return;
+  const c = (p.comments||[]).find(x=>x.id===commentId);
+  if(!c || c.author !== ME) return;
+  const txt = prompt("Editar comentário:", c.content);
+  if(txt===null) return;
+  c.content = String(txt).trim().slice(0,2000);
+  c.updatedAt = nowISO();
+  saveData(DATA);
+  toast($("#commentToast"), "Comentário atualizado.");
+  renderComments(p);
+}
+function deleteComment(commentId){
+  const cat = forumState.currentCategory;
+  const p = getPosts(cat).find(x=>x.id===forumState.selectedPostId);
+  if(!p) return;
+  const cs = p.comments||[];
+  const idx = cs.findIndex(x=>x.id===commentId);
+  if(idx<0) return;
+  if(cs[idx].author !== ME) return;
+  if(!confirm("Excluir comentário?")) return;
+  cs.splice(idx,1);
+  saveData(DATA);
+  toast($("#commentToast"), "Comentário excluído.");
+  renderComments(p);
+}
+
+/* =========================
+   Groups
+========================= */
+let groupState = { selectedId:null, lastSearch:"" };
+function renderGroups(){
+  const q = (groupState.lastSearch||"").toLowerCase().trim();
+  let list = DATA.groups || [];
+  if(q){
+    list = list.filter(g =>
+      (g.name||"").toLowerCase().includes(q) ||
+      (g.topic||"").toLowerCase().includes(q) ||
+      (g.owner||"").toLowerCase().includes(q)
+    );
+  }
+  const el = $("#groupsList");
+  if(list.length===0){ el.innerHTML = `<div class="muted">Sem grupos.</div>`; return; }
+  el.innerHTML = list.map(g=>{
+    const membersCount = (g.members||[]).length;
+    const isMember = (g.members||[]).includes(ME);
+    return `
+      <div class="cardItem">
+        <div class="meta">${esc(g.createdAt)} • dono <b>${esc(g.owner)}</b></div>
+        <div class="title">${esc(g.name)}</div>
+        <div class="muted tiny">Tópico: ${esc(g.topic||"—")} • membros: ${membersCount}</div>
+        <div class="actions"><button class="btn ghost" data-gopen="${esc(g.id)}">Abrir</button>${isMember?`<span class="chip">membro</span>`:""}</div>
+      </div>`;
+  }).join("");
+  $$("[data-gopen]").forEach(b=> b.addEventListener("click", ()=> openGroup(b.dataset.gopen)));
+}
+function openGroup(id){
+  const g = (DATA.groups||[]).find(x=>x.id===id);
+  if(!g) return;
+  groupState.selectedId=id;
+  $("#groupDetailCard").hidden=false;
+  $("#gDetailName").textContent = g.name;
+  $("#gDetailMeta").textContent = `${g.createdAt} • dono: ${g.owner} • atualizado: ${g.updatedAt}`;
+  $("#gDetailChips").innerHTML = `<span class="chip">${esc(g.topic||"sem tópico")}</span><span class="chip">${(g.members||[]).length} membros</span>`;
+  $("#gDetailRules").textContent = g.rules || "";
+  const isOwner = g.owner===ME;
+  const isMember = (g.members||[]).includes(ME);
+  $("#btnGroupJoin").hidden = isMember;
+  $("#btnGroupLeave").hidden = !isMember;
+  $("#btnGroupEdit").hidden = !isOwner;
+  $("#btnGroupDelete").hidden = !isOwner;
+  renderMemberList(g);
+  renderGroupMessages(g);
+}
+function closeGroup(){ groupState.selectedId=null; $("#groupDetailCard").hidden=true; }
+$("#btnGroupClose").addEventListener("click", closeGroup);
+$("#btnGroupSearch").addEventListener("click", ()=>{ groupState.lastSearch=$("#groupSearch").value; renderGroups(); });
+
+$("#btnGroupCreate").addEventListener("click", ()=>{
+  const name = $("#groupName").value.trim().slice(0,60);
+  const topic = $("#groupTopic").value.trim().slice(0,60);
+  const rules = $("#groupRules").value.trim().slice(0,1000);
+  const t = $("#groupToast");
+  if(!name) return toast(t, "Nome é obrigatório.", true);
+  const g = { id:uid(), owner:ME, name, topic, rules, createdAt:nowISO(), updatedAt:nowISO(), members:[ME], messages:[] };
+  DATA.groups.unshift(g);
+  const u = DATA.users[ME]; ensureUserSchema(u);
+  u.stats.groupsCreated = (u.stats.groupsCreated||0) + 1;
+  saveData(DATA);
+  $("#groupName").value=""; $("#groupTopic").value=""; $("#groupRules").value="";
+  addPoints(4);
+  toast(t, "Grupo criado! +4 pts");
+  renderGroups();
+  openGroup(g.id);
+  evaluateBadges();
+});
+
+$("#btnGroupJoin").addEventListener("click", ()=>{
+  const g = DATA.groups.find(x=>x.id===groupState.selectedId);
+  if(!g) return;
+  g.members ||= [];
+  if(!g.members.includes(ME)) g.members.push(ME);
+  g.updatedAt = nowISO();
+  saveData(DATA);
+  addPoints(2);
+  toast($("#groupToast"), "Entrou no grupo! +2 pts");
+  renderGroups();
+  openGroup(g.id);
+});
+
+$("#btnGroupLeave").addEventListener("click", ()=>{
+  const g = DATA.groups.find(x=>x.id===groupState.selectedId);
+  if(!g) return;
+  if(g.owner===ME) return toast($("#groupToast"), "Dono não pode sair. Exclua o grupo.", true);
+  g.members = (g.members||[]).filter(x=>x!==ME);
+  g.updatedAt=nowISO();
+  saveData(DATA);
+  toast($("#groupToast"), "Você saiu do grupo.");
+  renderGroups();
+  openGroup(g.id);
+});
+
+$("#btnGroupEdit").addEventListener("click", ()=>{
+  const g = DATA.groups.find(x=>x.id===groupState.selectedId);
+  if(!g) return;
+  if(g.owner!==ME) return toast($("#groupToast"), "Somente o dono edita.", true);
+  const name = prompt("Editar nome:", g.name); if(name===null) return;
+  const topic = prompt("Editar tópico:", g.topic||""); if(topic===null) return;
+  const rules = prompt("Editar regras:", g.rules||""); if(rules===null) return;
+  g.name=String(name).trim().slice(0,60);
+  g.topic=String(topic).trim().slice(0,60);
+  g.rules=String(rules).trim().slice(0,1000);
+  g.updatedAt=nowISO();
+  saveData(DATA);
+  toast($("#groupToast"), "Grupo atualizado.");
+  renderGroups(); openGroup(g.id);
+});
+
+$("#btnGroupDelete").addEventListener("click", ()=>{
+  const idx = DATA.groups.findIndex(x=>x.id===groupState.selectedId);
+  if(idx<0) return;
+  if(DATA.groups[idx].owner!==ME) return toast($("#groupToast"), "Somente o dono exclui.", true);
+  if(!confirm("Excluir este grupo?")) return;
+  DATA.groups.splice(idx,1);
+  saveData(DATA);
+  toast($("#groupToast"), "Grupo excluído.");
+  closeGroup();
+  renderGroups();
+});
+
+function renderMemberList(g){
+  const list = $("#memberList");
+  const members = (g.members||[]);
+  list.innerHTML = members.map(u=>{
+    const isOwner = (u===g.owner);
+    const canKick = (ME===g.owner) && (u!==g.owner);
+    return `
+      <div class="cardItem">
+        <div class="meta">${isOwner?"👑 dono":"membro"}</div>
+        <div class="title">@${esc(u)}</div>
+        ${canKick?`<div class="actions"><button class="btn ghost" data-kick="${esc(u)}">Remover</button></div>`:""}
+      </div>`;
+  }).join("") || `<div class="muted">Sem membros.</div>`;
+
+  $$("[data-kick]").forEach(b=>{
+    b.addEventListener("click", ()=>{
+      const u = b.dataset.kick;
+      if(!confirm(`Remover @${u}?`)) return;
+      g.members = (g.members||[]).filter(x=>x!==u);
+      g.updatedAt=nowISO();
+      saveData(DATA);
+      toast($("#memberToast"), "Membro removido.");
+      renderMemberList(g); renderGroups(); openGroup(g.id);
+    });
+  });
+}
+$("#btnAddMember").addEventListener("click", ()=>{
+  const g = DATA.groups.find(x=>x.id===groupState.selectedId);
+  const t = $("#memberToast");
+  if(!g) return;
+  if(g.owner!==ME) return toast(t, "Somente o dono adiciona.", true);
+  const uName = normalizeUser($("#memberUser").value);
+  if(!uName) return toast(t, "Informe um username.", true);
+  if(!DATA.users[uName]) return toast(t, "Usuário não existe (cadastre antes).", true);
+  g.members ||= [];
+  if(g.members.includes(uName)) return toast(t, "Já é membro.", true);
+  g.members.push(uName);
+
+  const u = DATA.users[ME]; ensureUserSchema(u);
+  u.stats.membersAdded = (u.stats.membersAdded||0) + 1;
+
+  g.updatedAt=nowISO();
+  saveData(DATA);
+  $("#memberUser").value="";
+  toast(t, "Membro adicionado!");
+  renderMemberList(g);
+  renderGroups();
+  openGroup(g.id);
+  evaluateBadges();
+});
+
+function renderGroupMessages(g){
+  const box = $("#groupMessages");
+  const msgs = g.messages || [];
+  if(msgs.length===0){ box.innerHTML = `<div class="muted">Sem mensagens.</div>`; return; }
+  box.innerHTML = msgs.map(m=>{
+    const mine = m.author===ME;
+    return `
+      <div class="cardItem">
+        <div class="meta">${esc(m.createdAt)} • <b>@${esc(m.author)}</b></div>
+        <div style="white-space:pre-wrap; margin-top:6px">${esc(m.content)}</div>
+        ${mine?`<div class="actions">
+          <button class="btn ghost" data-medit="${esc(m.id)}">Editar</button>
+          <button class="btn ghost" data-md="${esc(m.id)}">Excluir</button>
+        </div>`:""}
+      </div>`;
+  }).join("");
+  $$("[data-medit]").forEach(b=> b.addEventListener("click", ()=> editMsg(g, b.dataset.medit)));
+  $$("[data-md]").forEach(b=> b.addEventListener("click", ()=> delMsg(g, b.dataset.md)));
+}
+$("#btnGroupMsgSend").addEventListener("click", ()=>{
+  const g = DATA.groups.find(x=>x.id===groupState.selectedId);
+  const t = $("#gMsgToast");
+  if(!g) return;
+  if(!(g.members||[]).includes(ME)) return toast(t, "Entre no grupo para enviar.", true);
+  const content = $("#groupMsgText").value.trim().slice(0,2000);
+  if(!content) return toast(t, "Mensagem vazia.", true);
+  g.messages ||= [];
+  g.messages.push({ id:uid(), author:ME, content, createdAt:nowISO(), updatedAt:nowISO() });
+  g.updatedAt=nowISO();
+  saveData(DATA);
+  $("#groupMsgText").value="";
+  addPoints(1);
+  toast(t, "Enviado! +1 pt");
+  renderGroupMessages(g);
+});
+function editMsg(g, id){
+  const m = (g.messages||[]).find(x=>x.id===id);
+  if(!m || m.author!==ME) return;
+  const txt = prompt("Editar mensagem:", m.content);
+  if(txt===null) return;
+  m.content=String(txt).trim().slice(0,2000);
+  m.updatedAt=nowISO();
+  g.updatedAt=nowISO();
+  saveData(DATA);
+  toast($("#gMsgToast"), "Mensagem atualizada.");
+  renderGroupMessages(g);
+}
+function delMsg(g, id){
+  const idx = (g.messages||[]).findIndex(x=>x.id===id);
+  if(idx<0) return;
+  if(g.messages[idx].author!==ME) return;
+  if(!confirm("Excluir mensagem?")) return;
+  g.messages.splice(idx,1);
+  g.updatedAt=nowISO();
+  saveData(DATA);
+  toast($("#gMsgToast"), "Mensagem excluída.");
+  renderGroupMessages(g);
+}
+
+/* =========================
+   Profile + Theme
+========================= */
+$("#btnProfileSave").addEventListener("click", ()=>{
+  const u = DATA.users[ME]; ensureUserSchema(u);
+  u.displayName = $("#pName").value.trim().slice(0,40);
+  u.bio = $("#pBio").value.trim().slice(0,280);
+  u.goal = Math.max(0, Math.min(999, Number($("#pGoal").value||30)));
+  u.privacy = $("#pPrivacy").value;
+  saveData(DATA);
+  paintMe();
+  toast($("#profileToast"), "Perfil salvo!");
+});
+$("#btnAvatarUpload").addEventListener("click", ()=>{
+  const file = $("#pAvatarFile").files?.[0];
+  const t = $("#profileToast");
+  if(!file) return toast(t, "Escolha uma imagem.", true);
+  if(!["image/png","image/jpeg","image/webp"].includes(file.type)) return toast(t, "Use PNG/JPEG/WEBP.", true);
+  const reader = new FileReader();
+  reader.onload = () => {
+    const u = DATA.users[ME]; ensureUserSchema(u);
+    u.avatarDataUrl = String(reader.result||"");
+    saveData(DATA);
+    paintMe();
+    toast(t, "Avatar atualizado!");
+  };
+  reader.readAsDataURL(file);
+});
+$("#btnAvatarReset").addEventListener("click", ()=>{
+  const u = DATA.users[ME]; ensureUserSchema(u);
+  u.avatarDataUrl = "";
+  saveData(DATA);
+  paintMe();
+  toast($("#profileToast"), "Avatar removido.");
+});
+$("#btnThemeApply").addEventListener("click", ()=>{
+  const theme = $("#pTheme").value;
+  const u = DATA.users[ME]; ensureUserSchema(u);
+  u.theme = theme;
+  saveData(DATA);
+  applyTheme(theme);
+  paintMe();
+  toast($("#profileToast"), "Tema aplicado!");
+});
+
+/* =========================
+   Badges UI
+========================= */
+function renderBadges(){
+  if(!ME) return;
+  const u = DATA.users[ME]; ensureUserSchema(u);
+  const info = calcLevel(u.points||0);
+  $("#lvlNow").textContent = info.lvl;
+  $("#lvlPoints").textContent = u.points||0;
+  $("#lvlNext").textContent = info.toNext;
+  $("#lvlBar").style.width = Math.round(info.progress*100) + "%";
+  $("#lvlTitle").textContent = `Título do nível: ${info.title}`;
+  $("#badgeGrid").innerHTML = BADGES.map(b=>{
+    const unlocked = u.badges.includes(b.id);
+    return `
+      <div class="badge ${unlocked?"":"locked"}">
+        <div class="bTop">
+          <div class="bIcon">${b.icon}</div>
+          <div class="chip">${unlocked ? "desbloqueado" : "bloqueado"}</div>
+        </div>
+        <div class="bName">${esc(b.name)}</div>
+        <div class="bDesc">${esc(b.desc)}</div>
+      </div>`;
+  }).join("");
+}
+
+/* =========================
+   Rank + Report
+========================= */
+function renderRank(){
+  const list = Object.entries(DATA.users)
+    .filter(([_, v]) => (v.privacy||"public") === "public")
+    .map(([u, v]) => ({ username:u, displayName:v.displayName||u, points: v.points||0 }))
+    .sort((a,b)=> b.points - a.points)
+    .slice(0,50);
+  const box = $("#rankList");
+  if(list.length===0){ box.innerHTML = `<div class="muted">Sem usuários públicos.</div>`; return; }
+  box.innerHTML = list.map((u, i)=>`
+    <div class="rankRow">
+      <div class="pos">#${i+1}</div>
+      <div>
+        <div class="name">${esc(u.displayName)}</div>
+        <div class="muted tiny">@${esc(u.username)}</div>
+      </div>
+      <div class="pts">${u.points} pts</div>
+    </div>`).join("");
+}
+$("#btnRankRefresh").addEventListener("click", renderRank);
+
+function renderReport(){
+  const u = DATA.users[ME]; ensureUserSchema(u);
+  const info = calcLevel(u.points||0);
+  $("#reportBox").innerHTML = `
+    <b>${esc(u.displayName||ME)}</b> • Nível ${info.lvl} (${esc(info.title)})<br/>
+    <span class="muted tiny">Pontos: ${u.points||0} • Hoje: ${u.dayPoints||0} • Meta: ${u.goal||30}</span>
+    <hr class="sep"/>
+    <div class="muted tiny">
+      Posts: <b>${u.stats.posts||0}</b> • Comentários: <b>${u.stats.comments||0}</b> • Pomodoros: <b>${u.stats.pomodoroDone||0}</b><br/>
+      Quizzes concluídos: <b>${u.stats.quizzesFinished||0}</b> • Etapas de trilhas: <b>${u.stats.trackStepsDone||0}</b>
+    </div>`;
+}
+function exportJSON(){
+  const payload = {
+    exportedAt: new Date().toISOString(),
+    user: ME,
+    data: {
+      userData: DATA.users[ME],
+      tracks: DATA.tracks[ME],
+      groups: (DATA.groups||[]).filter(g => (g.members||[]).includes(ME) || g.owner === ME)
+    }
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type:"application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `focuszone_${ME}_export.json`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+$("#btnExportJSON").addEventListener("click", ()=>{
+  exportJSON();
+  toast($("#reportToast"), "JSON exportado (download iniciado).");
+});
+
+/* =========================
+   View entry
+========================= */
+function onEnterView(v){
+  if(!ME) return;
+  if(v==="videos") renderVideos();
+  if(v==="tracks") renderTrack();
+  if(v==="quiz") renderQuiz();
+  if(v==="games"){ paintPom(); if(!mem.cards.length) newMemory(); }
+  if(v==="forum"){ ensureForumCategoriesUI(); renderPosts(); }
+  if(v==="groups") renderGroups();
+  if(v==="profile") paintMe();
+  if(v==="badges") renderBadges();
+  if(v==="report") renderReport();
+  if(v==="rank") renderRank();
+}
+
+/* =========================
+   Boot
+========================= */
+function boot(){
+  // inicia selects
+  initQuizSelect();
+  initTrackSelect();
+  ensureForumCategoriesUI();
+
+  // aplica tema base (sem login)
+  applyTheme("aqua");
+
+  // auto-login se sessão existir
+  if(DATA.session && DATA.users[DATA.session]){
+    ME = DATA.session;
+    ensureUserSchema(DATA.users[ME]);
+    ensureTrackUser();
+    applyTheme(DATA.users[ME].theme || "aqua");
+    paintMe();
+    setView("home");
+    evaluateBadges();
+  } else {
+    // se não logado, manda para auth e esconde conteúdo
+    setView("auth");
+    $("#mePill").hidden = true;
+    $("#btnLogout").hidden = true;
+  }
+}
+boot();
+</script>
+
+</body>
+</html>
