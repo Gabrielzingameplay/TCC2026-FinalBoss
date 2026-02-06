@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -34,7 +35,7 @@
 html,body{height:100%}
 body{
   margin:0;
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+  font-family: ui-sans-serif, note, system-ui, -apple-system, Segoe UI, Roboto, Arial;
   color: var(--text);
   background:
     radial-gradient(1200px 700px at 12% 18%, rgba(99,255,242,.12), transparent 60%),
@@ -223,6 +224,11 @@ input:focus, textarea:focus, select:focus{
   cursor:pointer;
   font-weight:950;
   transition:.18s transform, .18s filter, .18s border;
+  text-decoration:none;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
 }
 .btn:hover{transform: translateY(-1px); filter:brightness(1.1); border-color: rgba(99,255,242,.38)}
 .btn:disabled{opacity:.45; cursor:not-allowed; transform:none}
@@ -396,6 +402,36 @@ input:focus, textarea:focus, select:focus{
 .badge .bName{font-weight:950}
 .badge .bDesc{color:var(--muted); font-size:12px; margin-top:6px}
 
+.authWrap{
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 16px;
+}
+.authHeader{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  margin-bottom: 14px;
+}
+.authHeader .left{
+  display:flex; gap:12px; align-items:center;
+}
+.authHeader .tag{
+  font-size:12px;
+  color: var(--muted);
+  border:1px solid rgba(120,160,255,.18);
+  background: rgba(0,0,0,.16);
+  padding: 7px 10px;
+  border-radius:999px;
+}
+.authSwitch{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+
 @media (max-width: 980px){
   .shell{grid-template-columns:1fr}
   .sidebar{position:relative; top:auto; height:auto}
@@ -437,7 +473,85 @@ input:focus, textarea:focus, select:focus{
   </div>
 </header>
 
-<main class="shell">
+<!-- AUTH: PÁGINAS SEPARADAS (no mesmo arquivo) -->
+<section class="panel" id="view-login">
+  <div class="authWrap">
+    <div class="authHeader">
+      <div class="left">
+        <div class="logo" style="width:42px;height:42px;border-radius:14px">FZ</div>
+        <div>
+          <div class="title">Entrar</div>
+          <div class="subtitle">Acesse sua conta e continue o progresso</div>
+        </div>
+      </div>
+      <div class="authSwitch">
+        <span class="tag">Novo por aqui?</span>
+        <a class="btn ghost" href="#register">Criar conta</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Login</h2>
+      <div class="box">
+        <label>Usuário</label>
+        <input id="loginUser" autocomplete="username" placeholder="ex.: gabriel" />
+        <label>Senha</label>
+        <input id="loginPass" type="password" autocomplete="current-password" placeholder="••••••" />
+        <div class="row">
+          <button class="btn" id="btnLogin">Entrar</button>
+          <a class="btn ghost" href="#register">Não tenho conta</a>
+        </div>
+        <div class="toast" id="loginToast" hidden></div>
+      </div>
+
+      <div class="note" style="margin-top:14px">
+        <b>Dica:</b> se quiser “mudar de usuário”, clique em <b>Sair</b> no topo depois do login.
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="panel" id="view-register">
+  <div class="authWrap">
+    <div class="authHeader">
+      <div class="left">
+        <div class="logo" style="width:42px;height:42px;border-radius:14px">FZ</div>
+        <div>
+          <div class="title">Criar conta</div>
+          <div class="subtitle">Cadastro rápido para começar a trilha</div>
+        </div>
+      </div>
+      <div class="authSwitch">
+        <span class="tag">Já tem conta?</span>
+        <a class="btn ghost" href="#login">Fazer login</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Cadastro</h2>
+      <p class="muted">Conta local. Use um usuário simples (sem espaços).</p>
+
+      <div class="box">
+        <label>Usuário</label>
+        <input id="regUser" autocomplete="username" placeholder="mín. 3 letras" />
+        <label>Senha</label>
+        <input id="regPass" type="password" autocomplete="new-password" placeholder="mín. 6 chars" />
+        <div class="row">
+          <button class="btn" id="btnRegister">Criar conta</button>
+          <a class="btn ghost" href="#login">Voltar</a>
+        </div>
+        <div class="toast" id="regToast" hidden></div>
+      </div>
+
+      <div class="note" style="margin-top:14px">
+        <b>Após cadastrar</b>, você volta para login automaticamente.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- APP -->
+<main class="shell" id="appShell" hidden>
   <aside class="sidebar">
     <button class="nav active" data-view="home">Painel</button>
     <button class="nav" data-view="content">Conteúdo</button>
@@ -460,39 +574,8 @@ input:focus, textarea:focus, select:focus{
   </aside>
 
   <section class="content">
-
-    <!-- AUTH -->
-    <section class="panel active" id="view-auth">
-      <div class="card">
-        <h2>Entrar no <span class="neon">Focus Zone</span></h2>
-        <p class="muted">Conta local. Tudo fica salvo no seu navegador.</p>
-
-        <div class="grid2">
-          <div class="box">
-            <h3>Login</h3>
-            <label>Usuário</label>
-            <input id="loginUser" autocomplete="username" placeholder="ex.: gabriel" />
-            <label>Senha</label>
-            <input id="loginPass" type="password" autocomplete="current-password" placeholder="••••••" />
-            <button class="btn" id="btnLogin">Entrar</button>
-          </div>
-
-          <div class="box">
-            <h3>Cadastro</h3>
-            <label>Usuário</label>
-            <input id="regUser" autocomplete="username" placeholder="mín. 3 letras" />
-            <label>Senha</label>
-            <input id="regPass" type="password" autocomplete="new-password" placeholder="mín. 6 chars" />
-            <button class="btn ghost" id="btnRegister">Criar conta</button>
-          </div>
-        </div>
-
-        <div class="toast" id="authToast" hidden></div>
-      </div>
-    </section>
-
     <!-- HOME -->
-    <section class="panel" id="view-home">
+    <section class="panel active" id="view-home">
       <div class="grid3">
         <div class="card">
           <h2>Painel Futurístico</h2>
@@ -1016,11 +1099,7 @@ input:focus, textarea:focus, select:focus{
 </main>
 
 <script>
-/* =========================
-   FIX DO LOGIN/CADASTRO (100%)
-   - O problema mais comum é: DATA não salvar / session não persistir.
-   - Aqui garante: loadData robusto, seed, save, session, hash e eventos.
-========================= */
+/* ========= Helpers ========= */
 const $ = (s)=>document.querySelector(s);
 const $$ = (s)=>Array.from(document.querySelectorAll(s));
 const nowISO = () => new Date().toISOString().slice(0,19).replace("T"," ");
@@ -1028,6 +1107,7 @@ const uid = () => Math.random().toString(36).slice(2,10) + "-" + Date.now().toSt
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (m)=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m]));
 
 function toast(el, msg, err=false){
+  if(!el) return;
   el.textContent = msg;
   el.classList.toggle("err", !!err);
   el.hidden = false;
@@ -1065,7 +1145,7 @@ function applyTheme(theme){
   root.style.setProperty("--stroke", hexToRgba(t.a2, 0.18));
 }
 
-/* ===== Level + Badges ===== */
+/* ===== Levels + Badges ===== */
 const LEVELS = [
   { lvl:1, min:0,    title:"Recruta do Foco" },
   { lvl:2, min:60,   title:"Cadete da Disciplina" },
@@ -1075,7 +1155,6 @@ const LEVELS = [
   { lvl:6, min:700,  title:"Mestre do Estudo Profundo" },
   { lvl:7, min:1000, title:"Lenda do Focus Zone" }
 ];
-
 function calcLevel(points){
   let lvl = 1, title = LEVELS[0].title, nextMin = null, curMin = 0;
   for(let i=0;i<LEVELS.length;i++){
@@ -1104,7 +1183,7 @@ const BADGES = [
 ];
 
 /* ===== Storage ===== */
-const KEY = "FOCUSZONE_APP_ONEFILE_V1"; // novo key para evitar conflito com versões quebradas
+const KEY = "FOCUSZONE_APP_ONEFILE_V2_AUTHROUTES";
 const FORUM_CATEGORIES = [
   "Foco e Rotina",
   "Redes Sociais com Consciência",
@@ -1113,17 +1192,7 @@ const FORUM_CATEGORIES = [
   "Dúvidas e Ajuda",
   "Recursos e Ferramentas"
 ];
-
-const DEFAULT_VIDEOS = [
-  "GMt7fxRDWB0",
-  "gPYn-GROXhg",
-  "WHQ8HfjMS6c",
-  "eGg1qKa9hys",
-  "k5BT8KsVEx4",
-  "p3dlQlHPJns",
-  "dzRjOnJ0Ndw",
-  "PKEsSjZnEYM"
-];
+const DEFAULT_VIDEOS = ["GMt7fxRDWB0","gPYn-GROXhg","WHQ8HfjMS6c","eGg1qKa9hys","k5BT8KsVEx4","p3dlQlHPJns","dzRjOnJ0Ndw","PKEsSjZnEYM"];
 
 function defaultData(){
   const d = { session:null, users:{}, forum:{}, groups:[], videos:[...DEFAULT_VIDEOS], tracks:{} };
@@ -1131,7 +1200,6 @@ function defaultData(){
   seedInitialForum(d);
   return d;
 }
-
 function loadData(){
   try{
     const raw = localStorage.getItem(KEY);
@@ -1159,10 +1227,12 @@ function saveData(d){ localStorage.setItem(KEY, JSON.stringify(d)); }
 
 /* ===== Auth hash ===== */
 function hashPass(p){
-  // hash simples (não é segurança real; é protótipo local)
   let h = 0;
   for(let i=0;i<p.length;i++){ h = ((h<<5)-h) + p.charCodeAt(i); h|=0; }
   return "h" + Math.abs(h);
+}
+function normalizeUser(s){
+  return (s||"").trim().toLowerCase().replace(/\s+/g,"");
 }
 
 /* ===== Seed forum ===== */
@@ -1171,22 +1241,16 @@ function seedInitialForum(d){
     const post = { id: uid(), author, title, tags, content, createdAt: nowISO(), updatedAt: nowISO(), comments: [] };
     d.forum[cat].posts.unshift(post);
   };
-
-  addPost("Foco e Rotina","admin","Como usar o Pomodoro sem se sabotar",
-    "pomodoro,foco,rotina",
+  addPost("Foco e Rotina","admin","Como usar o Pomodoro sem se sabotar","pomodoro,foco,rotina",
 `O Pomodoro funciona melhor quando você respeita:
 1) Durante o foco: anote distrações e volte depois.
 2) Na pausa: pause de verdade (água, alongamento), sem rolagem infinita.
 
 Comece com 5 ou 15 min e aumente.`);
-
-  addPost("Técnicas de Estudo","admin","Active Recall: aprender de verdade",
-    "active recall,estudo,memorização",
+  addPost("Técnicas de Estudo","admin","Active Recall: aprender de verdade","active recall,estudo,memorização",
 `Aprendizagem ativa é se testar: perguntas, exercícios, explicar com suas palavras.
 Releitura passiva dá sensação de progresso, mas retém pouco.`);
-
-  addPost("Redes Sociais com Consciência","admin","Como evitar a rolagem infinita",
-    "redes sociais,limite,consciência",
+  addPost("Redes Sociais com Consciência","admin","Como evitar a rolagem infinita","redes sociais,limite,consciência",
 `Antes de abrir qualquer app:
 - Objetivo? (pesquisar? falar com alguém?)
 - Tempo? (ex.: 10 min)
@@ -1264,26 +1328,56 @@ const QUIZZES = {
 let DATA = loadData();
 let ME = null;
 
-/* ===== Navigation ===== */
+/* ===== UI auth/app shell toggles ===== */
+function showAuth(route){
+  $("#appShell").hidden = true;
+  $("#mePill").hidden = true;
+  $("#btnLogout").hidden = true;
+
+  $("#view-login").classList.remove("active");
+  $("#view-register").classList.remove("active");
+  $("#view-login").style.display = "none";
+  $("#view-register").style.display = "none";
+
+  if(route === "register"){
+    $("#view-register").style.display = "block";
+    $("#view-register").classList.add("active");
+  }else{
+    $("#view-login").style.display = "block";
+    $("#view-login").classList.add("active");
+  }
+}
+
+function showApp(){
+  $("#view-login").classList.remove("active");
+  $("#view-register").classList.remove("active");
+  $("#view-login").style.display = "none";
+  $("#view-register").style.display = "none";
+  $("#appShell").hidden = false;
+  $("#mePill").hidden = false;
+  $("#btnLogout").hidden = false;
+}
+
+/* ===== Navigation (APP) ===== */
 function setView(name){
   $$(".nav").forEach(b => b.classList.toggle("active", b.dataset.view === name));
-  $$(".panel").forEach(p => p.classList.remove("active"));
-  $(`#view-${name}`).classList.add("active");
+  $$("#appShell .panel").forEach(p => p.classList.remove("active"));
+  const target = $(`#view-${name}`);
+  if(target){ target.classList.add("active"); }
   onEnterView(name);
 }
 $$(".nav").forEach(btn=>{
   btn.addEventListener("click", ()=>{
-    if(!ME){ setView("auth"); return; }
+    if(!ME){ location.hash = "#login"; return; }
     setView(btn.dataset.view);
   });
 });
-
 $("#btnLogout").addEventListener("click", ()=>{
   DATA.session = null;
   saveData(DATA);
   ME = null;
-  paintMe();
-  setView("auth");
+  location.hash = "#login";
+  route();
 });
 
 /* ===== User helpers ===== */
@@ -1295,7 +1389,6 @@ function fallbackAvatar(letter){
     </svg>`;
   return "data:image/svg+xml,"+encodeURIComponent(svg);
 }
-
 function ensureUserSchema(u){
   u.displayName ||= "";
   u.bio ||= "";
@@ -1303,7 +1396,6 @@ function ensureUserSchema(u){
   u.points ||= 0;
   u.goal = (u.goal ?? 30);
   u.privacy ||= "public";
-  u.notifs ||= "off";
   u.theme ||= "aqua";
   u.checklist ||= { notifs:false, desk:false, goal:false, tabs:false, phone:false };
   u.dayStamp ||= new Date().toDateString();
@@ -1321,13 +1413,7 @@ function ensureTrackUser(){
 }
 
 function paintMe(){
-  const pill = $("#mePill");
-  const btn = $("#btnLogout");
-  if(!ME){
-    pill.hidden = true;
-    btn.hidden = true;
-    return;
-  }
+  if(!ME) return;
   const u = DATA.users[ME];
   ensureUserSchema(u);
 
@@ -1368,9 +1454,6 @@ function paintMe(){
     const k = ck.dataset.ck;
     ck.checked = !!(u.checklist?.[k]);
   });
-
-  pill.hidden = false;
-  btn.hidden = false;
 }
 
 function addPoints(delta){
@@ -1420,12 +1503,8 @@ function evaluateBadges(){
 }
 
 /* =========================
-   LOGIN/CADASTRO (CORRIGIDO)
+   AUTH (rotas separadas)
 ========================= */
-function normalizeUser(s){
-  return (s||"").trim().toLowerCase().replace(/\s+/g,"");
-}
-
 function loginAs(username){
   ME = username;
   DATA.session = username;
@@ -1439,12 +1518,16 @@ function loginAs(username){
   }
   applyTheme(u.theme || "aqua");
   paintMe();
-  setView("home");
   evaluateBadges();
+
+  // vai pro app
+  location.hash = "#app";
+  route();
+  setView("home");
 }
 
 $("#btnRegister").addEventListener("click", ()=>{
-  const t = $("#authToast");
+  const t = $("#regToast");
   const u = normalizeUser($("#regUser").value);
   const p = String($("#regPass").value || "");
 
@@ -1452,49 +1535,47 @@ $("#btnRegister").addEventListener("click", ()=>{
   if(p.length < 6) return toast(t, "Senha mínimo 6 caracteres.", true);
   if(DATA.users[u]) return toast(t, "Usuário já existe.", true);
 
-  DATA.users[u] = {
-    passHash: hashPass(p)
-  };
+  DATA.users[u] = { passHash: hashPass(p) };
   ensureUserSchema(DATA.users[u]);
-
-  // Nome padrão:
   DATA.users[u].displayName = u;
 
   saveData(DATA);
-  toast(t, "Conta criada! Agora faça login.", false);
-
-  // preenche login automaticamente
+  toast(t, "Conta criada! Indo para login…");
   $("#loginUser").value = u;
   $("#loginPass").value = "";
+  setTimeout(()=>{ location.hash = "#login"; route(); }, 600);
 });
 
 $("#btnLogin").addEventListener("click", ()=>{
-  const t = $("#authToast");
+  const t = $("#loginToast");
   const u = normalizeUser($("#loginUser").value);
   const p = String($("#loginPass").value || "");
   const user = DATA.users[u];
 
   if(!u) return toast(t, "Informe o usuário.", true);
   if(!p) return toast(t, "Informe a senha.", true);
-  if(!user) return toast(t, "Usuário não encontrado. Faça cadastro.", true);
-
-  if(user.passHash !== hashPass(p)){
-    return toast(t, "Senha inválida.", true);
-  }
+  if(!user) return toast(t, "Usuário não encontrado. Crie conta.", true);
+  if(user.passHash !== hashPass(p)) return toast(t, "Senha inválida.", true);
 
   loginAs(u);
 });
 
 document.addEventListener("keydown", (e)=>{
-  if(e.key === "Enter" && !ME){
-    // Enter para logar rapidamente
-    $("#btnLogin").click();
+  const h = (location.hash||"").replace("#","");
+  if(e.key === "Enter"){
+    if(h === "login" || h === "" || h === "app"){
+      if(!ME && $("#btnLogin")) $("#btnLogin").click();
+    }
+    if(h === "register"){
+      if(!ME && $("#btnRegister")) $("#btnRegister").click();
+    }
   }
 });
 
 /* ===== Checklist ===== */
 $$(".ck").forEach(ck=>{
   ck.addEventListener("change", ()=>{
+    if(!ME) return;
     const u = DATA.users[ME];
     ensureUserSchema(u);
     u.checklist[ck.dataset.ck] = ck.checked;
@@ -1951,7 +2032,7 @@ function clickMem(id){
 $("#memNew").addEventListener("click", newMemory);
 
 /* =========================
-   Forum
+   Forum (categorias)
 ========================= */
 function ensureForumCategoriesUI(){
   $("#forumCategory").innerHTML = FORUM_CATEGORIES.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join("");
@@ -2049,7 +2130,6 @@ $("#btnPostCreate").addEventListener("click", ()=>{
   openPost(post.id);
   evaluateBadges();
 });
-
 $("#btnForumSearch").addEventListener("click", ()=>{ forumState.lastSearch = $("#forumSearch").value; renderPosts(); });
 $("#forumCategory").addEventListener("change", ()=>{ forumState.lastSearch=""; $("#forumSearch").value=""; closePost(); renderPosts(); });
 
@@ -2069,7 +2149,6 @@ $("#btnPostEdit").addEventListener("click", ()=>{
   renderPosts();
   openPost(p.id);
 });
-
 $("#btnPostDelete").addEventListener("click", ()=>{
   const cat = forumState.currentCategory;
   const posts = getPosts(cat);
@@ -2082,7 +2161,6 @@ $("#btnPostDelete").addEventListener("click", ()=>{
   closePost();
   renderPosts();
 });
-
 $("#btnCommentCreate").addEventListener("click", ()=>{
   const cat = forumState.currentCategory;
   const p = getPosts(cat).find(x=>x.id===forumState.selectedPostId);
@@ -2167,7 +2245,7 @@ function openGroup(id){
   groupState.selectedId=id;
   $("#groupDetailCard").hidden=false;
   $("#gDetailName").textContent = g.name;
-  $("#gDetailMeta").textContent = `${g.createdAt} • dono: ${g.owner} • atualizado: ${g.updatedAt}`;
+  $("#gDetailMeta").textContent = `${esc(g.createdAt)} • dono: ${esc(g.owner)} • atualizado: ${esc(g.updatedAt)}`;
   $("#gDetailChips").innerHTML = `<span class="chip">${esc(g.topic||"sem tópico")}</span><span class="chip">${(g.members||[]).length} membros</span>`;
   $("#gDetailRules").textContent = g.rules || "";
   const isOwner = g.owner===ME;
@@ -2201,7 +2279,6 @@ $("#btnGroupCreate").addEventListener("click", ()=>{
   openGroup(g.id);
   evaluateBadges();
 });
-
 $("#btnGroupJoin").addEventListener("click", ()=>{
   const g = DATA.groups.find(x=>x.id===groupState.selectedId);
   if(!g) return;
@@ -2214,7 +2291,6 @@ $("#btnGroupJoin").addEventListener("click", ()=>{
   renderGroups();
   openGroup(g.id);
 });
-
 $("#btnGroupLeave").addEventListener("click", ()=>{
   const g = DATA.groups.find(x=>x.id===groupState.selectedId);
   if(!g) return;
@@ -2226,7 +2302,6 @@ $("#btnGroupLeave").addEventListener("click", ()=>{
   renderGroups();
   openGroup(g.id);
 });
-
 $("#btnGroupEdit").addEventListener("click", ()=>{
   const g = DATA.groups.find(x=>x.id===groupState.selectedId);
   if(!g) return;
@@ -2242,7 +2317,6 @@ $("#btnGroupEdit").addEventListener("click", ()=>{
   toast($("#groupToast"), "Grupo atualizado.");
   renderGroups(); openGroup(g.id);
 });
-
 $("#btnGroupDelete").addEventListener("click", ()=>{
   const idx = DATA.groups.findIndex(x=>x.id===groupState.selectedId);
   if(idx<0) return;
@@ -2254,7 +2328,6 @@ $("#btnGroupDelete").addEventListener("click", ()=>{
   closeGroup();
   renderGroups();
 });
-
 function renderMemberList(g){
   const list = $("#memberList");
   const members = (g.members||[]);
@@ -2305,7 +2378,6 @@ $("#btnAddMember").addEventListener("click", ()=>{
   openGroup(g.id);
   evaluateBadges();
 });
-
 function renderGroupMessages(g){
   const box = $("#groupMessages");
   const msgs = g.messages || [];
@@ -2514,32 +2586,50 @@ function onEnterView(v){
 }
 
 /* =========================
-   Boot
+   ROUTER (hash)
+   - #login
+   - #register
+   - #app
 ========================= */
-function boot(){
-  // inicia selects
-  initQuizSelect();
-  initTrackSelect();
-  ensureForumCategoriesUI();
-
-  // aplica tema base (sem login)
-  applyTheme("aqua");
-
-  // auto-login se sessão existir
+function route(){
+  const h = (location.hash || "#login").replace("#","").trim();
   if(DATA.session && DATA.users[DATA.session]){
     ME = DATA.session;
     ensureUserSchema(DATA.users[ME]);
     ensureTrackUser();
     applyTheme(DATA.users[ME].theme || "aqua");
-    paintMe();
-    setView("home");
-    evaluateBadges();
-  } else {
-    // se não logado, manda para auth e esconde conteúdo
-    setView("auth");
-    $("#mePill").hidden = true;
-    $("#btnLogout").hidden = true;
+  }else{
+    ME = null;
   }
+
+  if(!ME){
+    if(h === "register") showAuth("register");
+    else showAuth("login");
+    return;
+  }
+
+  // logado:
+  showApp();
+  paintMe();
+  // se entrou em app/sem rota, vai pro painel
+  setView("home");
+}
+
+window.addEventListener("hashchange", route);
+
+/* =========================
+   Boot
+========================= */
+function boot(){
+  initQuizSelect();
+  initTrackSelect();
+  ensureForumCategoriesUI();
+  applyTheme("aqua");
+
+  // default route
+  if(!location.hash) location.hash = "#login";
+
+  route();
 }
 boot();
 </script>
